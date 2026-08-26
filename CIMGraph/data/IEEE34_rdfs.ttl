@@ -1,0 +1,2188 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ns0: <http://iec.ch/TC57/1999/rdf-schema-extensions-19990926#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://iec.ch/TC57/CIM100#ACLineSegment>
+  a rdfs:Class ;
+  rdfs:label "#ACLineSegment" ;
+  rdfs:comment """A wire or combination of wires, with consistent electrical characteristics, building a single electrical system, used to carry alternating current between points in the power system.
+For symmetrical, transposed three phase lines, it is sufficient to use attributes of the line segment, which describe impedances and admittances for the entire length of the segment.  Additionally impedances can be computed by using length and associated per length impedances.
+The BaseVoltage at the two ends of ACLineSegments in a Line shall have the same BaseVoltage.nominalVoltage. However, boundary lines may have slightly different BaseVoltage.nominalVoltages and variation is allowed. Larger voltage difference in general requires use of an equivalent branch.""" ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Wires> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#Conductor> .
+
+<http://iec.ch/TC57/CIM100#Conductor>
+  a rdfs:Class ;
+  rdfs:label "#Conductor" ;
+  rdfs:comment "Combination of conducting material with consistent electrical characteristics, building a single electrical system, used to carry current between points in the power system." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Wires> .
+
+<http://iec.ch/TC57/CIM100#ACLineSegmentPhase>
+  a rdfs:Class ;
+  rdfs:label "#ACLineSegmentPhase" ;
+  rdfs:comment "Represents a single wire of an alternating current line segment." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Wires> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#PowerSystemResource> .
+
+<http://iec.ch/TC57/CIM100#PowerSystemResource>
+  a rdfs:Class ;
+  rdfs:label "#PowerSystemResource" ;
+  rdfs:comment "A power system resource (PSR) can be an item of equipment such as a switch, an equipment container containing many individual items of equipment such as a substation, or an organisational entity such as sub-control area. Power system resources can have measurements associated." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Core> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#IdentifiedObject> .
+
+<http://iec.ch/TC57/CIM100#IdentifiedObject>
+  a rdfs:Class ;
+  rdfs:label "#IdentifiedObject" ;
+  rdfs:comment "This is a root class to provide common identification for all classes needing identification and naming attributes." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Core> .
+
+<http://iec.ch/TC57/CIM100#BaseVoltage>
+  a rdfs:Class ;
+  rdfs:label "#BaseVoltage" ;
+  rdfs:comment "Defines a system base voltage which is referenced." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Core> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#IdentifiedObject> .
+
+<http://iec.ch/TC57/CIM100#ConnectivityNode>
+  a rdfs:Class ;
+  rdfs:label "#ConnectivityNode" ;
+  rdfs:comment "Connectivity nodes are points where terminals of AC conducting equipment are connected together with zero impedance." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Core> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#IdentifiedObject> .
+
+<http://iec.ch/TC57/CIM100#CoordinateSystem>
+  a rdfs:Class ;
+  rdfs:label "#CoordinateSystem" ;
+  rdfs:comment "Coordinate reference system." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Common> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#IdentifiedObject> .
+
+<http://iec.ch/TC57/CIM100#CurrentLimit>
+  a rdfs:Class ;
+  rdfs:label "#CurrentLimit" ;
+  rdfs:comment "Operational limit on current." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_OperationalLimits> .
+
+<http://iec.ch/TC57/CIM100#EnergyConsumer>
+  a rdfs:Class ;
+  rdfs:label "#EnergyConsumer" ;
+  rdfs:comment """Generic user of energy - a  point of consumption on the power system model.
+EnergyConsumer.pfixed, .qfixed, .pfixedPct and .qfixedPct have meaning only if there is no LoadResponseCharacteristic associated with EnergyConsumer or if LoadResponseCharacteristic.exponentModel is set to False.""" ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Wires> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#ConductingEquipment> .
+
+<http://iec.ch/TC57/CIM100#ConductingEquipment>
+  a rdfs:Class ;
+  rdfs:label "#ConductingEquipment" ;
+  rdfs:comment "The parts of the AC power system that are designed to carry current or that are conductively connected through terminals." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Core> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#Equipment> .
+
+<http://iec.ch/TC57/CIM100#Equipment>
+  a rdfs:Class ;
+  rdfs:label "#Equipment" ;
+  rdfs:comment "The parts of a power system that are physical devices, electronic or mechanical." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Core> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#PowerSystemResource> .
+
+<http://iec.ch/TC57/CIM100#EnergyConsumerPhase>
+  a rdfs:Class ;
+  rdfs:label "#EnergyConsumerPhase" ;
+  rdfs:comment "A single phase of an energy consumer." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Wires> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#PowerSystemResource> .
+
+<http://iec.ch/TC57/CIM100#EnergySource>
+  a rdfs:Class ;
+  rdfs:label "#EnergySource" ;
+  rdfs:comment "A generic equivalent for an energy supplier on a transmission or distribution voltage level." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Wires> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#ConductingEquipment> .
+
+<http://iec.ch/TC57/CIM100#Feeder>
+  a rdfs:Class ;
+  rdfs:label "#Feeder" ;
+  rdfs:comment """A collection of equipment for organizational purposes, used for grouping distribution resources.
+The organization a feeder does not necessarily reflect connectivity or current operation state.""" ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Core> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#EquipmentContainer> .
+
+<http://iec.ch/TC57/CIM100#EquipmentContainer>
+  a rdfs:Class ;
+  rdfs:label "#EquipmentContainer" ;
+  rdfs:comment "A modelling construct to provide a root class for containing equipment." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Core> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#ConnectivityNodeContainer> .
+
+<http://iec.ch/TC57/CIM100#ConnectivityNodeContainer>
+  a rdfs:Class ;
+  rdfs:label "#ConnectivityNodeContainer" ;
+  rdfs:comment "A base class for all objects that may contain connectivity nodes or topological nodes." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Core> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#PowerSystemResource> .
+
+<http://iec.ch/TC57/CIM100#GeographicalRegion>
+  a rdfs:Class ;
+  rdfs:label "#GeographicalRegion" ;
+  rdfs:comment "A geographical region of a power system network model." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Core> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#IdentifiedObject> .
+
+<http://iec.ch/TC57/CIM100#IEC61970CIMVersion>
+  a rdfs:Class ;
+  rdfs:label "#IEC61970CIMVersion" ;
+  rdfs:comment "This is the IEC 61970 CIM version number assigned to this UML model." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_IEC61970> .
+
+<http://iec.ch/TC57/CIM100#LinearShuntCompensator>
+  a rdfs:Class ;
+  rdfs:label "#LinearShuntCompensator" ;
+  rdfs:comment "A linear shunt compensator has banks or sections with equal admittance values." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Wires> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#ShuntCompensator> .
+
+<http://iec.ch/TC57/CIM100#ShuntCompensator>
+  a rdfs:Class ;
+  rdfs:label "#ShuntCompensator" ;
+  rdfs:comment "A shunt capacitor or reactor or switchable bank of shunt capacitors or reactors. A section of a shunt compensator is an individual capacitor or reactor.  A negative value for reactivePerSection indicates that the compensator is a reactor. ShuntCompensator is a single terminal device.  Ground is implied." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Wires> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#RegulatingCondEq> .
+
+<http://iec.ch/TC57/CIM100#RegulatingCondEq>
+  a rdfs:Class ;
+  rdfs:label "#RegulatingCondEq" ;
+  rdfs:comment "A type of conducting equipment that can regulate a quantity (i.e. voltage or flow) at a specific point in the network." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Wires> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#ConductingEquipment> .
+
+<http://iec.ch/TC57/CIM100#LoadResponseCharacteristic>
+  a rdfs:Class ;
+  rdfs:label "#LoadResponseCharacteristic" ;
+  rdfs:comment """Models the characteristic response of the load demand due to changes in system conditions such as voltage and frequency. It is not related to demand response.
+If LoadResponseCharacteristic.exponentModel is True, the exponential voltage or frequency dependent models are specified and used as to calculate active and reactive power components of the load model.
+The equations to calculate active and reactive power components of the load model are internal to the power flow calculation, hence they use different quantities depending on the use case of the data exchange. 
+The equations for exponential voltage dependent load model injected power are: 
+pInjection= Pnominal* (Voltage/cim:BaseVoltage.nominalVoltage) ** cim:LoadResponseCharacteristic.pVoltageExponent
+qInjection= Qnominal* (Voltage/cim:BaseVoltage.nominalVoltage) ** cim:LoadResponseCharacteristic.qVoltageExponent
+Where: 
+1) * means "multiply" and ** is "raised to power of";
+2) Pnominal and Qnominal represent the active power and reactive power at nominal voltage as any load described by the voltage exponential model shall be given at nominal voltage.  This means that EnergyConsumer.p and EnergyConsumer.q  are at nominal voltage.
+3) After power flow is solved: 
+-pInjection and qInjection correspond to SvPowerflow.p and SvPowerflow.q respectively.  
+- Voltage corresponds to SvVoltage.v at the TopologicalNode where the load is connected.""" ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_LoadModel> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#IdentifiedObject> .
+
+<http://iec.ch/TC57/CIM100#Location>
+  a rdfs:Class ;
+  rdfs:label "#Location" ;
+  rdfs:comment "The place, scene, or point of something where someone or something has been, is, and/or will be at a given moment in time. It can be defined with one or more position points (coordinates) in a given coordinate system." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Common> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#IdentifiedObject> .
+
+<http://iec.ch/TC57/CIM100#NoLoadTest>
+  a rdfs:Class ;
+  rdfs:label "#NoLoadTest" ;
+  rdfs:comment "No-load test results determine core admittance parameters. They include exciting current and core loss measurements from applying voltage to one winding. The excitation may be positive sequence or zero sequence. The test may be repeated at different voltages to measure saturation." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_AssetInfo> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#TransformerTest> .
+
+<http://iec.ch/TC57/CIM100#TransformerTest>
+  a rdfs:Class ;
+  rdfs:label "#TransformerTest" ;
+  rdfs:comment "Test result for transformer ends, such as short-circuit, open-circuit (excitation) or no-load test." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_AssetInfo> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#IdentifiedObject> .
+
+<http://iec.ch/TC57/CIM100#OperationalLimitSet>
+  a rdfs:Class ;
+  rdfs:label "#OperationalLimitSet" ;
+  rdfs:comment "A set of limits associated with equipment.  Sets of limits might apply to a specific temperature, or season for example. A set of limits may contain different severities of limit levels that would apply to the same equipment. The set may contain limits of different types such as apparent power and current limits or high and low voltage limits  that are logically applied together as a set." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_OperationalLimits> .
+
+<http://iec.ch/TC57/CIM100#OperationalLimitType>
+  a rdfs:Class ;
+  rdfs:label "#OperationalLimitType" ;
+  rdfs:comment "The operational meaning of a category of limits." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_OperationalLimits> .
+
+<http://iec.ch/TC57/CIM100#PerLengthPhaseImpedance>
+  a rdfs:Class ;
+  rdfs:label "#PerLengthPhaseImpedance" ;
+  rdfs:comment "Impedance and admittance parameters per unit length for n-wire unbalanced lines, in matrix form." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Wires> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#PerLengthImpedance> .
+
+<http://iec.ch/TC57/CIM100#PerLengthImpedance>
+  a rdfs:Class ;
+  rdfs:label "#PerLengthImpedance" ;
+  rdfs:comment "Common type for per-length impedance electrical catalogues." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Wires> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#IdentifiedObject> .
+
+<http://iec.ch/TC57/CIM100#PhaseImpedanceData>
+  a rdfs:Class ;
+  rdfs:label "#PhaseImpedanceData" ;
+  rdfs:comment """Impedance and conductance matrix element values. 
+The diagonal elements are described by the elements having the same toPhase and fromPhase value and the off diagonal elements have different toPhase and fromPhase values.  The matrix can also be stored in symmetric lower triangular format using the row and column attributes, which map to ACLineSegmentPhase.sequenceNumber.""" ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Wires> .
+
+<http://iec.ch/TC57/CIM100#PositionPoint>
+  a rdfs:Class ;
+  rdfs:label "#PositionPoint" ;
+  rdfs:comment "Set of spatial coordinates that determine a point, defined in the coordinate system specified in 'Location.CoordinateSystem'. Use a single position point instance to describe a point-oriented location. Use a sequence of position points to describe a line-oriented object (physical location of non-point oriented objects like cables or lines), or area of an object (like a substation or a geographical zone - in this case, have first and last position point with the same values)." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Common> .
+
+<http://iec.ch/TC57/CIM100#PowerTransformer>
+  a rdfs:Class ;
+  rdfs:label "#PowerTransformer" ;
+  rdfs:comment """An electrical device consisting of  two or more coupled windings, with or without a magnetic core, for introducing mutual coupling between electric circuits. Transformers can be used to control voltage and phase shift (active power flow).
+A power transformer may be composed of separate transformer tanks that need not be identical.
+A power transformer can be modelled with or without tanks and is intended for use in both balanced and unbalanced representations.   A power transformer typically has two terminals, but may have one (grounding), three or more terminals.
+The inherited association ConductingEquipment.BaseVoltage should not be used.  The association from TransformerEnd to BaseVoltage should be used instead.""" ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Wires> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#ConductingEquipment> .
+
+<http://iec.ch/TC57/CIM100#PowerTransformerEnd>
+  a rdfs:Class ;
+  rdfs:label "#PowerTransformerEnd" ;
+  rdfs:comment """A PowerTransformerEnd is associated with each Terminal of a PowerTransformer.
+The impedance values r, r0, x, and x0 of a PowerTransformerEnd represents a star equivalent as follows.
+1) for a two Terminal PowerTransformer the high voltage (TransformerEnd.endNumber=1) PowerTransformerEnd has non zero values on r, r0, x, and x0 while the low voltage (TransformerEnd.endNumber=2) PowerTransformerEnd has zero values for r, r0, x, and x0.  Parameters are always provided, even if the PowerTransformerEnds have the same rated voltage.  In this case, the parameters are provided at the PowerTransformerEnd which has TransformerEnd.endNumber equal to 1.
+2) for a three Terminal PowerTransformer the three PowerTransformerEnds represent a star equivalent with each leg in the star represented by r, r0, x, and x0 values.
+3) For a three Terminal transformer each PowerTransformerEnd shall have g, g0, b and b0 values corresponding to the no load losses distributed on the three PowerTransformerEnds. The total no load loss shunt impedances may also be placed at one of the PowerTransformerEnds, preferably the end numbered 1, having the shunt values on end 1.  This is the preferred way.
+4) for a PowerTransformer with more than three Terminals the PowerTransformerEnd impedance values cannot be used. Instead use the TransformerMeshImpedance or split the transformer into multiple PowerTransformers.
+Each PowerTransformerEnd must be contained by a PowerTransformer. Because a PowerTransformerEnd (or any other object) can not be contained by more than one parent, a PowerTransformerEnd can not have an association to an EquipmentContainer (Substation, VoltageLevel, etc).""" ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Wires> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#TransformerEnd> .
+
+<http://iec.ch/TC57/CIM100#TransformerEnd>
+  a rdfs:Class ;
+  rdfs:label "#TransformerEnd" ;
+  rdfs:comment "A conducting connection point of a power transformer. It corresponds to a physical transformer winding terminal.  In earlier CIM versions, the TransformerWinding class served a similar purpose, but this class is more flexible because it associates to terminal but is not a specialization of ConductingEquipment." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Wires> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#IdentifiedObject> .
+
+<http://iec.ch/TC57/CIM100#RatioTapChanger>
+  a rdfs:Class ;
+  rdfs:label "#RatioTapChanger" ;
+  rdfs:comment """A tap changer that changes the voltage ratio impacting the voltage magnitude but not the phase angle across the transformer.
+
+Angle sign convention (general): Positive value indicates a positive phase shift from the winding where the tap is located to the other winding (for a two-winding transformer).""" ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Wires> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#PowerSystemResource> .
+
+<http://iec.ch/TC57/CIM100#ShortCircuitTest>
+  a rdfs:Class ;
+  rdfs:label "#ShortCircuitTest" ;
+  rdfs:comment "Short-circuit test results determine mesh impedance parameters. They include load losses and leakage impedances. For three-phase windings, the excitation can be a positive sequence (the default) or a zero sequence. There shall be at least one grounded winding." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_AssetInfo> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#TransformerTest> .
+
+<http://iec.ch/TC57/CIM100#SubGeographicalRegion>
+  a rdfs:Class ;
+  rdfs:label "#SubGeographicalRegion" ;
+  rdfs:comment "A subset of a geographical region of a power system network model." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Core> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#IdentifiedObject> .
+
+<http://iec.ch/TC57/CIM100#Substation>
+  a rdfs:Class ;
+  rdfs:label "#Substation" ;
+  rdfs:comment "A collection of equipment for purposes other than generation or utilization, through which electric energy in bulk is passed for the purposes of switching or modifying its characteristics." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Core> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#EquipmentContainer> .
+
+<http://iec.ch/TC57/CIM100#TapChangerControl>
+  a rdfs:Class ;
+  rdfs:label "#TapChangerControl" ;
+  rdfs:comment "Describes behaviour specific to tap changers, e.g. how the voltage at the end of a line varies with the load level and compensation of the voltage drop by tap adjustment." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Wires> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#RegulatingControl> .
+
+<http://iec.ch/TC57/CIM100#RegulatingControl>
+  a rdfs:Class ;
+  rdfs:label "#RegulatingControl" ;
+  rdfs:comment """Specifies a set of equipment that works together to control a power system quantity such as voltage or flow. 
+Remote bus voltage control is possible by specifying the controlled terminal located at some place remote from the controlling equipment.
+The specified terminal shall be associated with the connectivity node of the controlled point.  The most specific subtype of RegulatingControl shall be used in case such equipment participate in the control, e.g. TapChangerControl for tap changers.
+For flow control, load sign convention is used, i.e. positive sign means flow out from a TopologicalNode (bus) into the conducting equipment.
+The attribute minAllowedTargetValue and maxAllowedTargetValue are required in the following cases:
+- For a power generating module operated in power factor control mode to specify maximum and minimum power factor values;
+- Whenever it is necessary to have an off center target voltage for the tap changer regulator. For instance, due to long cables to off shore wind farms and the need to have a simpler setup at the off shore transformer platform, the voltage is controlled from the land at the connection point for the off shore wind farm. Since there usually is a voltage rise along the cable, there is typical and overvoltage of up 3-4 kV compared to the on shore station. Thus in normal operation the tap changer on the on shore station is operated with a target set point, which is in the lower parts of the dead band.
+The attributes minAllowedTargetValue and maxAllowedTargetValue are not related to the attribute targetDeadband and thus they are not treated as an alternative of the targetDeadband. They are needed due to limitations in the local substation controller. The attribute targetDeadband is used to prevent the power flow from move the tap position in circles (hunting) that is to be used regardless of the attributes minAllowedTargetValue and maxAllowedTargetValue.""" ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Wires> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#PowerSystemResource> .
+
+<http://iec.ch/TC57/CIM100#Terminal>
+  a rdfs:Class ;
+  rdfs:label "#Terminal" ;
+  rdfs:comment "An AC electrical connection point to a piece of conducting equipment. Terminals are connected at physical connection points called connectivity nodes." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Core> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#IdentifiedObject> .
+
+<http://iec.ch/TC57/CIM100#TopologicalIsland>
+  a rdfs:Class ;
+  rdfs:label "#TopologicalIsland" ;
+  rdfs:comment """An electrically connected subset of the network. Topological islands can change as the current network state changes, e.g. due to: 
+- disconnect switches or breakers changing state in a SCADA/EMS.
+- manual creation, change or deletion of topological nodes in a planning tool.
+Only energised TopologicalNode-s shall be part of the topological island.""" ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Topology> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#IdentifiedObject> .
+
+<http://iec.ch/TC57/CIM100#TopologicalNode>
+  a rdfs:Class ;
+  rdfs:label "#TopologicalNode" ;
+  rdfs:comment """For a detailed substation model a topological node is a set of connectivity nodes that, in the current network state, are connected together through any type of closed switches, including  jumpers. Topological nodes change as the current network state changes (i.e., switches, breakers, etc. change state).
+For a planning model, switch statuses are not used to form topological nodes. Instead they are manually created or deleted in a model builder tool. Topological nodes maintained this way are also called "busses".""" ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Topology> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#IdentifiedObject> .
+
+<http://iec.ch/TC57/CIM100#TransformerCoreAdmittance>
+  a rdfs:Class ;
+  rdfs:label "#TransformerCoreAdmittance" ;
+  rdfs:comment "The transformer core admittance.  Used to specify the core admittance of a transformer in a manner that can be shared among power transformers." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Wires> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#IdentifiedObject> .
+
+<http://iec.ch/TC57/CIM100#TransformerEndInfo>
+  a rdfs:Class ;
+  rdfs:label "#TransformerEndInfo" ;
+  rdfs:comment "Transformer end data." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_AssetInfo> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#AssetInfo> .
+
+<http://iec.ch/TC57/CIM100#AssetInfo>
+  a rdfs:Class ;
+  rdfs:label "#AssetInfo" ;
+  rdfs:comment """Set of attributes of an asset, representing typical datasheet information of a physical device that can be instantiated and shared in different data exchange contexts:
+- as attributes of an asset instance (installed or in stock)
+- as attributes of an asset model (product by a manufacturer)
+- as attributes of a type asset (generic type of an asset as used in designs/extension planning).""" ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Assets> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#IdentifiedObject> .
+
+<http://iec.ch/TC57/CIM100#TransformerMeshImpedance>
+  a rdfs:Class ;
+  rdfs:label "#TransformerMeshImpedance" ;
+  rdfs:comment """Transformer mesh impedance (Delta-model) between transformer ends.
+The typical case is that this class describes the impedance between two transformer ends pair-wise, i.e. the cardinalities at both transformer end associations are 1. However, in cases where two or more transformer ends are modelled the cardinalities are larger than 1.""" ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Wires> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#IdentifiedObject> .
+
+<http://iec.ch/TC57/CIM100#TransformerTank>
+  a rdfs:Class ;
+  rdfs:label "#TransformerTank" ;
+  rdfs:comment "An assembly of two or more coupled windings that transform electrical power between voltage levels. These windings are bound on a common core and placed in the same tank. Transformer tank can be used to model both single-phase and 3-phase transformers." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Wires> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#Equipment> .
+
+<http://iec.ch/TC57/CIM100#TransformerTankEnd>
+  a rdfs:Class ;
+  rdfs:label "#TransformerTankEnd" ;
+  rdfs:comment "Transformer tank end represents an individual winding for unbalanced models or for transformer tanks connected into a bank (and bank is modelled with the PowerTransformer)." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Wires> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#TransformerEnd> .
+
+<http://iec.ch/TC57/CIM100#TransformerTankInfo>
+  a rdfs:Class ;
+  rdfs:label "#TransformerTankInfo" ;
+  rdfs:comment "Set of transformer tank data, from an equipment library." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_AssetInfo> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#AssetInfo> .
+
+<http://iec.ch/TC57/CIM100#VoltageLimit>
+  a rdfs:Class ;
+  rdfs:label "#VoltageLimit" ;
+  rdfs:comment """Operational limit applied to voltage.
+The use of operational VoltageLimit is preferred instead of limits defined at VoltageLevel. The operational VoltageLimits are used, if present.""" ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_OperationalLimits> ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#OperationalLimit> .
+
+<http://iec.ch/TC57/CIM100#OperationalLimit>
+  a rdfs:Class ;
+  rdfs:label "#OperationalLimit" ;
+  rdfs:comment """A value and normal value associated with a specific kind of limit. 
+The sub class value and normalValue attributes vary inversely to the associated OperationalLimitType.acceptableDuration (acceptableDuration for short).  
+If a particular piece of equipment has multiple operational limits of the same kind (apparent power, current, etc.), the limit with the greatest acceptableDuration shall have the smallest limit value and the limit with the smallest acceptableDuration shall have the largest limit value.  Note: A large current can only be allowed to flow through a piece of equipment for a short duration without causing damage, but a lesser current can be allowed to flow for a longer duration.""" ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_OperationalLimits> .
+
+<http://iec.ch/TC57/CIM100#ACLineSegment.PerLengthImpedance>
+  a rdf:Property ;
+  rdfs:label "PerLengthImpedance" ;
+  rdfs:comment "Per-length impedance of this line segment." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#ACLineSegment> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#PerLengthImpedance> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#PerLengthImpedance.ACLineSegments> .
+
+<http://iec.ch/TC57/CIM100#ConductingEquipment.BaseVoltage>
+  a rdf:Property ;
+  rdfs:label "BaseVoltage" ;
+  rdfs:comment "Base voltage of this conducting equipment.  Use only when there is no voltage level container used and only one base voltage applies.  For example, not used for transformers." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#ConductingEquipment> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#BaseVoltage> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#ConductingEquipment.BaseVoltage> .
+
+<http://iec.ch/TC57/CIM100#Conductor.length>
+  a rdf:Property ;
+  rdfs:label "length" ;
+  rdfs:comment "Segment length for calculating line section capabilities." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#Conductor> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Length> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#Equipment.EquipmentContainer>
+  a rdf:Property ;
+  rdfs:label "EquipmentContainer" ;
+  rdfs:comment "Container of this equipment." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#Equipment>, <http://iec.ch/TC57/CIM100#ConductingEquipment> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#EquipmentContainer> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#Equipment.EquipmentContainer> ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#ofAggregate> .
+
+<http://iec.ch/TC57/CIM100#IdentifiedObject.mRID>
+  a rdf:Property ;
+  rdfs:label "mRID" ;
+  rdfs:comment """Master resource identifier issued by a model authority. The mRID is unique within an exchange context. Global uniqueness is easily achieved by using a UUID, as specified in RFC 4122, for the mRID. The use of UUID is strongly recommended.
+For CIMXML data files in RDF syntax conforming to IEC 61970-552, the mRID is mapped to rdf:ID or rdf:about attributes that identify CIM object elements.""" ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#IdentifiedObject> ;
+  ns0:dataType xsd:string ;
+  ns0:multiplicity ns0:M:1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#IdentifiedObject.name>
+  a rdf:Property ;
+  rdfs:label "name" ;
+  rdfs:comment "The name is any free human readable and possibly non unique text naming the object." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#IdentifiedObject> ;
+  ns0:dataType xsd:string ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#PowerSystemResource.Location>
+  a rdf:Property ;
+  rdfs:label "Location" ;
+  rdfs:comment "Location of this power system resource." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#PowerSystemResource> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#Location> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#PowerSystemResource.Location> .
+
+<http://iec.ch/TC57/CIM100#ACLineSegmentPhase.ACLineSegment>
+  a rdf:Property ;
+  rdfs:label "ACLineSegment" ;
+  rdfs:comment "The line segment to which the phase belongs." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#ACLineSegmentPhase> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#ACLineSegment> ;
+  ns0:multiplicity ns0:M:1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#ACLineSegment.ACLineSegmentPhases> .
+
+<http://iec.ch/TC57/CIM100#ACLineSegmentPhase.phase>
+  a rdf:Property ;
+  rdfs:label "phase" ;
+  rdfs:comment "The phase connection of the wire at both ends." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#ACLineSegmentPhase> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#SinglePhaseKind> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#ACLineSegmentPhase.sequenceNumber>
+  a rdf:Property ;
+  rdfs:label "sequenceNumber" ;
+  rdfs:comment "Number designation for this line segment phase. Each line segment phase within a line segment should have a unique sequence number. This is useful for unbalanced modelling to bind the mathematical model (PhaseImpedanceData of PerLengthPhaseImpedance) with the connectivity model (this class) and the physical model (WirePosition) without tight coupling." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#ACLineSegmentPhase> ;
+  ns0:dataType xsd:integer ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#BaseVoltage.nominalVoltage>
+  a rdf:Property ;
+  rdfs:label "nominalVoltage" ;
+  rdfs:comment "The power system resource's base voltage.  Shall be a positive value and not zero." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#BaseVoltage> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Voltage> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#ConnectivityNode.ConnectivityNodeContainer>
+  a rdf:Property ;
+  rdfs:label "ConnectivityNodeContainer" ;
+  rdfs:comment "Container of this connectivity node." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#ConnectivityNode> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#ConnectivityNodeContainer> ;
+  ns0:multiplicity ns0:M:1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#ConnectivityNodeContainer.ConnectivityNodes> .
+
+<http://iec.ch/TC57/CIM100#ConnectivityNode.TopologicalNode>
+  a rdf:Property ;
+  rdfs:label "TopologicalNode" ;
+  rdfs:comment "The topological node to which this connectivity node is assigned.  May depend on the current state of switches in the network." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#ConnectivityNode> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#TopologicalNode> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#TopologicalNode.ConnectivityNodes> ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#ofAggregate> .
+
+<http://iec.ch/TC57/CIM100#CoordinateSystem.crsUrn>
+  a rdf:Property ;
+  rdfs:label "crsUrn" ;
+  rdfs:comment """A Uniform Resource Name (URN) for the coordinate reference system (crs) used to define 'Location.PositionPoints'.
+An example would be the European Petroleum Survey Group (EPSG) code for a coordinate reference system, defined in URN under the Open Geospatial Consortium (OGC) namespace as: urn:ogc:def:crs:EPSG::XXXX, where XXXX is an EPSG code (a full list of codes can be found at the EPSG Registry web site http://www.epsg-registry.org/). To define the coordinate system as being WGS84 (latitude, longitude) using an EPSG OGC, this attribute would be urn:ogc:def:crs:EPSG::4236.
+A profile should limit this code to a set of allowed URNs agreed to by all sending and receiving parties.""" ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#CoordinateSystem> ;
+  ns0:dataType xsd:string ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#CurrentLimit.value>
+  a rdf:Property ;
+  rdfs:label "value" ;
+  rdfs:comment "Limit on current flow. The attribute shall be a positive value or zero." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#CurrentLimit> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#CurrentFlow> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#OperationalLimit.OperationalLimitSet>
+  a rdf:Property ;
+  rdfs:label "OperationalLimitSet" ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#OperationalLimit> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#OperationalLimitSet> ;
+  ns0:multiplicity ns0:M:1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#OperationalLimitSet.OperationalLimitValue> ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#ofAggregate> .
+
+<http://iec.ch/TC57/CIM100#OperationalLimit.OperationalLimitType>
+  a rdf:Property ;
+  rdfs:label "OperationalLimitType" ;
+  rdfs:comment "The limit type associated with this limit." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#OperationalLimit> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#OperationalLimitType> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#OperationalLimitType.OperationalLimit> .
+
+<http://iec.ch/TC57/CIM100#EnergyConsumer.LoadResponse>
+  a rdf:Property ;
+  rdfs:label "LoadResponse" ;
+  rdfs:comment "The load response characteristic of this load.  If missing, this load is assumed to be constant power." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#EnergyConsumer> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#LoadResponseCharacteristic> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#LoadResponseCharacteristic.EnergyConsumer> .
+
+<http://iec.ch/TC57/CIM100#EnergyConsumer.customerCount>
+  a rdf:Property ;
+  rdfs:label "customerCount" ;
+  rdfs:comment "Number of individual customers represented by this demand." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#EnergyConsumer> ;
+  ns0:dataType xsd:integer ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#EnergyConsumer.grounded>
+  a rdf:Property ;
+  rdfs:label "grounded" ;
+  rdfs:comment "Used for Yn and Zn connections. True if the neutral is solidly grounded." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#EnergyConsumer> ;
+  ns0:dataType xsd:boolean ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#EnergyConsumer.p>
+  a rdf:Property ;
+  rdfs:label "p" ;
+  rdfs:comment """Active power of the load. Load sign convention is used, i.e. positive sign means flow out from a node.
+For voltage dependent loads the value is at rated voltage.
+Starting value for a steady state solution.""" ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#EnergyConsumer> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#ActivePower> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#EnergyConsumer.phaseConnection>
+  a rdf:Property ;
+  rdfs:label "phaseConnection" ;
+  rdfs:comment "The type of phase connection, such as wye or delta." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#EnergyConsumer> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#PhaseShuntConnectionKind> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#EnergyConsumer.q>
+  a rdf:Property ;
+  rdfs:label "q" ;
+  rdfs:comment """Reactive power of the load. Load sign convention is used, i.e. positive sign means flow out from a node.
+For voltage dependent loads the value is at rated voltage.
+Starting value for a steady state solution.""" ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#EnergyConsumer> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#ReactivePower> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#EnergyConsumerPhase.EnergyConsumer>
+  a rdf:Property ;
+  rdfs:label "EnergyConsumer" ;
+  rdfs:comment "The energy consumer to which this phase belongs." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#EnergyConsumerPhase> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#EnergyConsumer> ;
+  ns0:multiplicity ns0:M:1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#EnergyConsumer.EnergyConsumerPhase> .
+
+<http://iec.ch/TC57/CIM100#EnergyConsumerPhase.p>
+  a rdf:Property ;
+  rdfs:label "p" ;
+  rdfs:comment """Active power of the load. Load sign convention is used, i.e. positive sign means flow out from a node.
+For voltage dependent loads the value is at rated voltage.
+Starting value for a steady state solution.""" ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#EnergyConsumerPhase> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#ActivePower> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#EnergyConsumerPhase.phase>
+  a rdf:Property ;
+  rdfs:label "phase" ;
+  rdfs:comment "Phase of this energy consumer component.   If the energy consumer is wye connected, the connection is from the indicated phase to the central ground or neutral point.  If the energy consumer is delta connected, the phase indicates an energy consumer connected from the indicated phase to the next logical non-neutral phase." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#EnergyConsumerPhase> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#SinglePhaseKind> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#EnergyConsumerPhase.q>
+  a rdf:Property ;
+  rdfs:label "q" ;
+  rdfs:comment """Reactive power of the load. Load sign convention is used, i.e. positive sign means flow out from a node.
+For voltage dependent loads the value is at rated voltage.
+Starting value for a steady state solution.""" ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#EnergyConsumerPhase> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#ReactivePower> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#EnergySource.nominalVoltage>
+  a rdf:Property ;
+  rdfs:label "nominalVoltage" ;
+  rdfs:comment "Phase-to-phase nominal voltage." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#EnergySource> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Voltage> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#EnergySource.r>
+  a rdf:Property ;
+  rdfs:label "r" ;
+  rdfs:comment "Positive sequence Thevenin resistance." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#EnergySource> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Resistance> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#EnergySource.r0>
+  a rdf:Property ;
+  rdfs:label "r0" ;
+  rdfs:comment "Zero sequence Thevenin resistance." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#EnergySource> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Resistance> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#EnergySource.voltageAngle>
+  a rdf:Property ;
+  rdfs:label "voltageAngle" ;
+  rdfs:comment "Phase angle of a-phase open circuit used when voltage characteristics need to be imposed at the node associated with the terminal of the energy source, such as when voltages and angles from the transmission level are used as input to the distribution network. The attribute shall be a positive value or zero." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#EnergySource> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#AngleRadians> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#EnergySource.voltageMagnitude>
+  a rdf:Property ;
+  rdfs:label "voltageMagnitude" ;
+  rdfs:comment "Phase-to-phase open circuit voltage magnitude used when voltage characteristics need to be imposed at the node associated with the terminal of the energy source, such as when voltages and angles from the transmission level are used as input to the distribution network. The attribute shall be a positive value or zero." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#EnergySource> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Voltage> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#EnergySource.x>
+  a rdf:Property ;
+  rdfs:label "x" ;
+  rdfs:comment "Positive sequence Thevenin reactance." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#EnergySource> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Reactance> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#EnergySource.x0>
+  a rdf:Property ;
+  rdfs:label "x0" ;
+  rdfs:comment "Zero sequence Thevenin reactance." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#EnergySource> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Reactance> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#Feeder.NormalEnergizingSubstation>
+  a rdf:Property ;
+  rdfs:label "NormalEnergizingSubstation" ;
+  rdfs:comment "The substation that nominally energizes the feeder.  Also used for naming purposes." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#Feeder> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#Substation> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#Substation.NormalEnergizedFeeder> ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#ofAggregate> .
+
+<http://iec.ch/TC57/CIM100#IEC61970CIMVersion.date>
+  a rdf:Property ;
+  rdfs:label "date" ;
+  rdfs:comment "Form is YYYY-MM-DD for example for January 5, 2009 it is 2009-01-05." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#IEC61970CIMVersion> ;
+  ns0:dataType xsd:date ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#IEC61970CIMVersion.version>
+  a rdf:Property ;
+  rdfs:label "version" ;
+  rdfs:comment "Form is IEC61970CIMXXvYY where XX is the major CIM package version and the YY is the minor version. For example IEC61970CIM13v18." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#IEC61970CIMVersion> ;
+  ns0:dataType xsd:string ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#LinearShuntCompensator.b0PerSection>
+  a rdf:Property ;
+  rdfs:label "b0PerSection" ;
+  rdfs:comment "Zero sequence shunt (charging) susceptance per section." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#LinearShuntCompensator> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Susceptance> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#LinearShuntCompensator.bPerSection>
+  a rdf:Property ;
+  rdfs:label "bPerSection" ;
+  rdfs:comment "Positive sequence shunt (charging) susceptance per section." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#LinearShuntCompensator> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Susceptance> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#LinearShuntCompensator.g0PerSection>
+  a rdf:Property ;
+  rdfs:label "g0PerSection" ;
+  rdfs:comment "Zero sequence shunt (charging) conductance per section." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#LinearShuntCompensator> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Conductance> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#LinearShuntCompensator.gPerSection>
+  a rdf:Property ;
+  rdfs:label "gPerSection" ;
+  rdfs:comment "Positive sequence shunt (charging) conductance per section." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#LinearShuntCompensator> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Conductance> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#ShuntCompensator.aVRDelay>
+  a rdf:Property ;
+  rdfs:label "aVRDelay" ;
+  rdfs:comment "An automatic voltage regulation delay (AVRDelay) which is the time delay from a change in voltage to when the capacitor is allowed to change state. This filters out temporary changes in voltage." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#ShuntCompensator> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Seconds> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#ShuntCompensator.grounded>
+  a rdf:Property ;
+  rdfs:label "grounded" ;
+  rdfs:comment "Used for Yn and Zn connections. True if the neutral is solidly grounded." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#ShuntCompensator> ;
+  ns0:dataType xsd:boolean ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#ShuntCompensator.maximumSections>
+  a rdf:Property ;
+  rdfs:label "maximumSections" ;
+  rdfs:comment "The maximum number of sections that may be switched in." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#ShuntCompensator> ;
+  ns0:dataType xsd:integer ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#ShuntCompensator.nomU>
+  a rdf:Property ;
+  rdfs:label "nomU" ;
+  rdfs:comment "The voltage at which the nominal reactive power may be calculated. This should normally be within 10% of the voltage at which the capacitor is connected to the network." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#ShuntCompensator> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Voltage> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#ShuntCompensator.normalSections>
+  a rdf:Property ;
+  rdfs:label "normalSections" ;
+  rdfs:comment "The normal number of sections switched in. The value shall be between zero and ShuntCompensator.maximumSections." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#ShuntCompensator> ;
+  ns0:dataType xsd:integer ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#ShuntCompensator.phaseConnection>
+  a rdf:Property ;
+  rdfs:label "phaseConnection" ;
+  rdfs:comment "The type of phase connection, such as wye or delta." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#ShuntCompensator> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#PhaseShuntConnectionKind> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#LoadResponseCharacteristic.exponentModel>
+  a rdf:Property ;
+  rdfs:label "exponentModel" ;
+  rdfs:comment """Indicates the exponential voltage dependency model is to be used. If false, the coefficient model is to be used.
+The exponential voltage dependency model consist of the attributes:
+- pVoltageExponent
+- qVoltageExponent
+- pFrequencyExponent
+- qFrequencyExponent.
+The coefficient model consist of the attributes:
+- pConstantImpedance
+- pConstantCurrent
+- pConstantPower
+- qConstantImpedance
+- qConstantCurrent
+- qConstantPower.
+The sum of pConstantImpedance, pConstantCurrent and pConstantPower shall equal 1.
+The sum of qConstantImpedance, qConstantCurrent and qConstantPower shall equal 1.""" ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#LoadResponseCharacteristic> ;
+  ns0:dataType xsd:boolean ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#LoadResponseCharacteristic.pConstantCurrent>
+  a rdf:Property ;
+  rdfs:label "pConstantCurrent" ;
+  rdfs:comment "Portion of active power load modelled as constant current." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#LoadResponseCharacteristic> ;
+  ns0:dataType xsd:float ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#LoadResponseCharacteristic.pConstantImpedance>
+  a rdf:Property ;
+  rdfs:label "pConstantImpedance" ;
+  rdfs:comment "Portion of active power load modelled as constant impedance." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#LoadResponseCharacteristic> ;
+  ns0:dataType xsd:float ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#LoadResponseCharacteristic.pConstantPower>
+  a rdf:Property ;
+  rdfs:label "pConstantPower" ;
+  rdfs:comment "Portion of active power load modelled as constant power." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#LoadResponseCharacteristic> ;
+  ns0:dataType xsd:float ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#LoadResponseCharacteristic.pFrequencyExponent>
+  a rdf:Property ;
+  rdfs:label "pFrequencyExponent" ;
+  rdfs:comment "Exponent of per unit frequency effecting active power." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#LoadResponseCharacteristic> ;
+  ns0:dataType xsd:float ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#LoadResponseCharacteristic.pVoltageExponent>
+  a rdf:Property ;
+  rdfs:label "pVoltageExponent" ;
+  rdfs:comment "Exponent of per unit voltage effecting real power." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#LoadResponseCharacteristic> ;
+  ns0:dataType xsd:float ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#LoadResponseCharacteristic.qConstantCurrent>
+  a rdf:Property ;
+  rdfs:label "qConstantCurrent" ;
+  rdfs:comment "Portion of reactive power load modelled as constant current." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#LoadResponseCharacteristic> ;
+  ns0:dataType xsd:float ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#LoadResponseCharacteristic.qConstantImpedance>
+  a rdf:Property ;
+  rdfs:label "qConstantImpedance" ;
+  rdfs:comment "Portion of reactive power load modelled as constant impedance." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#LoadResponseCharacteristic> ;
+  ns0:dataType xsd:float ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#LoadResponseCharacteristic.qConstantPower>
+  a rdf:Property ;
+  rdfs:label "qConstantPower" ;
+  rdfs:comment "Portion of reactive power load modelled as constant power." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#LoadResponseCharacteristic> ;
+  ns0:dataType xsd:float ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#LoadResponseCharacteristic.qFrequencyExponent>
+  a rdf:Property ;
+  rdfs:label "qFrequencyExponent" ;
+  rdfs:comment "Exponent of per unit frequency effecting reactive power." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#LoadResponseCharacteristic> ;
+  ns0:dataType xsd:float ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#LoadResponseCharacteristic.qVoltageExponent>
+  a rdf:Property ;
+  rdfs:label "qVoltageExponent" ;
+  rdfs:comment "Exponent of per unit voltage effecting reactive power." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#LoadResponseCharacteristic> ;
+  ns0:dataType xsd:float ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#Location.CoordinateSystem>
+  a rdf:Property ;
+  rdfs:label "CoordinateSystem" ;
+  rdfs:comment "Coordinate system used to describe position points of this location." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#Location> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#CoordinateSystem> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#CoordinateSystem.Locations> .
+
+<http://iec.ch/TC57/CIM100#NoLoadTest.EnergisedEnd>
+  a rdf:Property ;
+  rdfs:label "EnergisedEnd" ;
+  rdfs:comment "Transformer end that current is applied to in this no-load test." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#NoLoadTest> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#TransformerEndInfo> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#TransformerEndInfo.EnergisedEndNoLoadTests> .
+
+<http://iec.ch/TC57/CIM100#NoLoadTest.energisedEndVoltage>
+  a rdf:Property ;
+  rdfs:label "energisedEndVoltage" ;
+  rdfs:comment "Voltage applied to the winding (end) during test." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#NoLoadTest> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Voltage> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#NoLoadTest.excitingCurrent>
+  a rdf:Property ;
+  rdfs:label "excitingCurrent" ;
+  rdfs:comment "Exciting current measured from a positive-sequence or single-phase excitation test." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#NoLoadTest> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#PerCent> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#NoLoadTest.excitingCurrentZero>
+  a rdf:Property ;
+  rdfs:label "excitingCurrentZero" ;
+  rdfs:comment "Exciting current measured from a zero-sequence open-circuit excitation test." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#NoLoadTest> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#PerCent> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#NoLoadTest.loss>
+  a rdf:Property ;
+  rdfs:label "loss" ;
+  rdfs:comment "Losses measured from a positive-sequence or single-phase excitation test." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#NoLoadTest> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#KiloActivePower> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#NoLoadTest.lossZero>
+  a rdf:Property ;
+  rdfs:label "lossZero" ;
+  rdfs:comment "Losses measured from a zero-sequence excitation test." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#NoLoadTest> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#KiloActivePower> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TransformerTest.basePower>
+  a rdf:Property ;
+  rdfs:label "basePower" ;
+  rdfs:comment "Base power at which the tests are conducted, usually equal to the rateds of one of the involved transformer ends." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerTest> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#ApparentPower> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TransformerTest.temperature>
+  a rdf:Property ;
+  rdfs:label "temperature" ;
+  rdfs:comment "Temperature at which the test is conducted." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerTest> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Temperature> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#OperationalLimitType.acceptableDuration>
+  a rdf:Property ;
+  rdfs:label "acceptableDuration" ;
+  rdfs:comment "The nominal acceptable duration of the limit. Limits are commonly expressed in terms of the time limit for which the limit is normally acceptable. The actual acceptable duration of a specific limit may depend on other local factors such as temperature or wind speed. The attribute has meaning only if the flag isInfiniteDuration is set to false, hence it shall not be exchanged when isInfiniteDuration is set to true." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#OperationalLimitType> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Seconds> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#OperationalLimitType.direction>
+  a rdf:Property ;
+  rdfs:label "direction" ;
+  rdfs:comment "The direction of the limit." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#OperationalLimitType> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#OperationalLimitDirectionKind> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#PerLengthPhaseImpedance.conductorCount>
+  a rdf:Property ;
+  rdfs:label "conductorCount" ;
+  rdfs:comment "Number of phase, neutral, and other wires retained. Constrains the number of matrix elements and the phase codes that can be used with this matrix." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#PerLengthPhaseImpedance> ;
+  ns0:dataType xsd:integer ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#PhaseImpedanceData.PhaseImpedance>
+  a rdf:Property ;
+  rdfs:label "PhaseImpedance" ;
+  rdfs:comment "Conductor phase impedance to which this data belongs." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#PhaseImpedanceData> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#PerLengthPhaseImpedance> ;
+  ns0:multiplicity ns0:M:1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#PerLengthPhaseImpedance.PhaseImpedanceData> .
+
+<http://iec.ch/TC57/CIM100#PhaseImpedanceData.b>
+  a rdf:Property ;
+  rdfs:label "b" ;
+  rdfs:comment "Susceptance matrix element value, per length of unit." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#PhaseImpedanceData> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#SusceptancePerLength> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#PhaseImpedanceData.column>
+  a rdf:Property ;
+  rdfs:label "column" ;
+  rdfs:comment "The matrix element's column number, in the range 1 to row. Only the lower triangle needs to be stored. This column number matches ACLineSegmentPhase.sequenceNumber." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#PhaseImpedanceData> ;
+  ns0:dataType xsd:integer ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#PhaseImpedanceData.r>
+  a rdf:Property ;
+  rdfs:label "r" ;
+  rdfs:comment "Resistance matrix element value, per length of unit." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#PhaseImpedanceData> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#ResistancePerLength> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#PhaseImpedanceData.row>
+  a rdf:Property ;
+  rdfs:label "row" ;
+  rdfs:comment "The matrix element's row number, in the range 1 to PerLengthPhaseImpedance.conductorCount. Only the lower triangle needs to be stored. This row number matches ACLineSegmentPhase.sequenceNumber." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#PhaseImpedanceData> ;
+  ns0:dataType xsd:integer ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#PhaseImpedanceData.x>
+  a rdf:Property ;
+  rdfs:label "x" ;
+  rdfs:comment "Reactance matrix element value, per length of unit." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#PhaseImpedanceData> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#ReactancePerLength> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#PositionPoint.Location>
+  a rdf:Property ;
+  rdfs:label "Location" ;
+  rdfs:comment "Location described by this position point." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#PositionPoint> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#Location> ;
+  ns0:multiplicity ns0:M:1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#Location.PositionPoints> .
+
+<http://iec.ch/TC57/CIM100#PositionPoint.sequenceNumber>
+  a rdf:Property ;
+  rdfs:label "sequenceNumber" ;
+  rdfs:comment "Zero-relative sequence number of this point within a series of points." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#PositionPoint> ;
+  ns0:dataType xsd:integer ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#PositionPoint.xPosition>
+  a rdf:Property ;
+  rdfs:label "xPosition" ;
+  rdfs:comment "X axis position." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#PositionPoint> ;
+  ns0:dataType xsd:string ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#PositionPoint.yPosition>
+  a rdf:Property ;
+  rdfs:label "yPosition" ;
+  rdfs:comment "Y axis position." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#PositionPoint> ;
+  ns0:dataType xsd:string ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#PowerTransformer.vectorGroup>
+  a rdf:Property ;
+  rdfs:label "vectorGroup" ;
+  rdfs:comment """Vector group of the transformer for protective relaying, e.g., Dyn1. For unbalanced transformers, this may not be simply determined from the constituent winding connections and phase angle displacements.
+
+The vectorGroup string consists of the following components in the order listed: high voltage winding connection, mid voltage winding connection (for three winding transformers), phase displacement clock number from 0 to 11,  low voltage winding connection 
+phase displacement clock number from 0 to 11.   The winding connections are D (delta), Y (wye), YN (wye with neutral), Z (zigzag), ZN (zigzag with neutral), A (auto transformer). Upper case means the high voltage, lower case mid or low. The high voltage winding always has clock position 0 and is not included in the vector group string.  Some examples: YNy0 (two winding wye to wye with no phase displacement), YNd11 (two winding wye to delta with 330 degrees phase displacement), YNyn0d5 (three winding transformer wye with neutral high voltage, wye with neutral mid voltage and no phase displacement, delta low voltage with 150 degrees displacement).
+
+Phase displacement is defined as the angular difference between the phasors representing the voltages between the neutral point (real or imaginary) and the corresponding terminals of two windings, a positive sequence voltage system being applied to the high-voltage terminals, following each other in alphabetical sequence if they are lettered, or in numerical sequence if they are numbered: the phasors are assumed to rotate in a counter-clockwise sense.""" ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#PowerTransformer> ;
+  ns0:dataType xsd:string ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#PowerTransformerEnd.PowerTransformer>
+  a rdf:Property ;
+  rdfs:label "PowerTransformer" ;
+  rdfs:comment "The power transformer of this power transformer end." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#PowerTransformerEnd> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#PowerTransformer> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#PowerTransformer.PowerTransformerEnd> .
+
+<http://iec.ch/TC57/CIM100#PowerTransformerEnd.connectionKind>
+  a rdf:Property ;
+  rdfs:label "connectionKind" ;
+  rdfs:comment "Kind of connection." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#PowerTransformerEnd> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#WindingConnection> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#PowerTransformerEnd.phaseAngleClock>
+  a rdf:Property ;
+  rdfs:label "phaseAngleClock" ;
+  rdfs:comment "Terminal voltage phase angle displacement where 360 degrees are represented with clock hours. The valid values are 0 to 11. For example, for the secondary side end of a transformer with vector group code of 'Dyn11', specify the connection kind as wye with neutral and specify the phase angle of the clock as 11.  The clock value of the transformer end number specified as 1, is assumed to be zero.  Note the transformer end number is not assumed to be the same as the terminal sequence number." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#PowerTransformerEnd> ;
+  ns0:dataType xsd:integer ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#PowerTransformerEnd.r>
+  a rdf:Property ;
+  rdfs:label "r" ;
+  rdfs:comment """Resistance (star-model) of the transformer end.
+The attribute shall be equal to or greater than zero for non-equivalent transformers.""" ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#PowerTransformerEnd> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Resistance> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#PowerTransformerEnd.ratedS>
+  a rdf:Property ;
+  rdfs:label "ratedS" ;
+  rdfs:comment """Normal apparent power rating.
+The attribute shall be a positive value. For a two-winding transformer the values for the high and low voltage sides shall be identical.""" ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#PowerTransformerEnd> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#ApparentPower> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#PowerTransformerEnd.ratedU>
+  a rdf:Property ;
+  rdfs:label "ratedU" ;
+  rdfs:comment """Rated voltage: phase-phase for three-phase windings, and either phase-phase or phase-neutral for single-phase windings.
+A high voltage side, as given by TransformerEnd.endNumber, shall have a ratedU that is greater than or equal to ratedU for the lower voltage sides.
+The attribute shall be a positive value.""" ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#PowerTransformerEnd> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Voltage> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TransformerEnd.BaseVoltage>
+  a rdf:Property ;
+  rdfs:label "BaseVoltage" ;
+  rdfs:comment "Base voltage of the transformer end.  This is essential for PU calculation." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerEnd> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#BaseVoltage> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#BaseVoltage.TransformerEnds> .
+
+<http://iec.ch/TC57/CIM100#TransformerEnd.Terminal>
+  a rdf:Property ;
+  rdfs:label "Terminal" ;
+  rdfs:comment "Terminal of the power transformer to which this transformer end belongs." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerEnd> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#Terminal> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#Terminal.TransformerEnd> .
+
+<http://iec.ch/TC57/CIM100#TransformerEnd.endNumber>
+  a rdf:Property ;
+  rdfs:label "endNumber" ;
+  rdfs:comment "Number for this transformer end, corresponding to the end's order in the power transformer vector group or phase angle clock number.  Highest voltage winding should be 1.  Each end within a power transformer should have a unique subsequent end number.   Note the transformer end number need not match the terminal sequence number." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerEnd> ;
+  ns0:dataType xsd:integer ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TransformerEnd.grounded>
+  a rdf:Property ;
+  rdfs:label "grounded" ;
+  rdfs:comment "(for Yn and Zn connections) True if the neutral is solidly grounded." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerEnd> ;
+  ns0:dataType xsd:boolean ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TransformerEnd.rground>
+  a rdf:Property ;
+  rdfs:label "rground" ;
+  rdfs:comment "(for Yn and Zn connections) Resistance part of neutral impedance where 'grounded' is true." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerEnd> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Resistance> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TransformerEnd.xground>
+  a rdf:Property ;
+  rdfs:label "xground" ;
+  rdfs:comment "(for Yn and Zn connections) Reactive part of neutral impedance where 'grounded' is true." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerEnd> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Reactance> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#RatioTapChanger.TransformerEnd>
+  a rdf:Property ;
+  rdfs:label "TransformerEnd" ;
+  rdfs:comment "Transformer end to which this ratio tap changer belongs." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#RatioTapChanger> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#TransformerEnd> ;
+  ns0:multiplicity ns0:M:1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#TransformerEnd.RatioTapChanger> .
+
+<http://iec.ch/TC57/CIM100#RatioTapChanger.stepVoltageIncrement>
+  a rdf:Property ;
+  rdfs:label "stepVoltageIncrement" ;
+  rdfs:comment """Tap step increment, in per cent of rated voltage of the power transformer end, per step position.
+When the increment is negative, the voltage decreases when the tap step increases.""" ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#RatioTapChanger> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#PerCent> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TapChanger.TapChangerControl>
+  a rdf:Property ;
+  rdfs:label "TapChangerControl" ;
+  rdfs:comment "The regulating control scheme in which this tap changer participates." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TapChanger> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#TapChangerControl> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#TapChangerControl.TapChanger> .
+
+<http://iec.ch/TC57/CIM100#TapChanger.controlEnabled>
+  a rdf:Property ;
+  rdfs:label "controlEnabled" ;
+  rdfs:comment "Specifies the regulation status of the equipment.  True is regulating, false is not regulating." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TapChanger> ;
+  ns0:dataType xsd:boolean ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TapChanger.highStep>
+  a rdf:Property ;
+  rdfs:label "highStep" ;
+  rdfs:comment """Highest possible tap step position, advance from neutral.
+The attribute shall be greater than lowStep.""" ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TapChanger> ;
+  ns0:dataType xsd:integer ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TapChanger.initialDelay>
+  a rdf:Property ;
+  rdfs:label "initialDelay" ;
+  rdfs:comment "For an LTC, the delay for initial tap changer operation (first step change)." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TapChanger> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Seconds> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TapChanger.lowStep>
+  a rdf:Property ;
+  rdfs:label "lowStep" ;
+  rdfs:comment "Lowest possible tap step position, retard from neutral." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TapChanger> ;
+  ns0:dataType xsd:integer ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TapChanger.ltcFlag>
+  a rdf:Property ;
+  rdfs:label "ltcFlag" ;
+  rdfs:comment "Specifies whether or not a TapChanger has load tap changing capabilities." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TapChanger> ;
+  ns0:dataType xsd:boolean ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TapChanger.neutralStep>
+  a rdf:Property ;
+  rdfs:label "neutralStep" ;
+  rdfs:comment """The neutral tap step position for this winding.
+The attribute shall be equal to or greater than lowStep and equal or less than highStep.
+It is the step position where the voltage is neutralU when the other terminals of the transformer are at the ratedU.  If there are other tap changers on the transformer those taps are kept constant at their neutralStep.""" ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TapChanger> ;
+  ns0:dataType xsd:integer ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TapChanger.neutralU>
+  a rdf:Property ;
+  rdfs:label "neutralU" ;
+  rdfs:comment """Voltage at which the winding operates at the neutral tap setting. It is the voltage at the terminal of the PowerTransformerEnd associated with the tap changer when all tap changers on the transformer are at their neutralStep position.  Normally neutralU of the tap changer is the same as ratedU of the PowerTransformerEnd, but it can differ in special cases such as when the tapping mechanism is separate from the winding more common on lower voltage transformers.
+This attribute is not relevant for PhaseTapChangerAsymmetrical, PhaseTapChangerSymmetrical and PhaseTapChangerLinear.""" ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TapChanger> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Voltage> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TapChanger.normalStep>
+  a rdf:Property ;
+  rdfs:label "normalStep" ;
+  rdfs:comment """The tap step position used in "normal" network operation for this winding. For a "Fixed" tap changer indicates the current physical tap setting.
+The attribute shall be equal to or greater than lowStep and equal to or less than highStep.""" ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TapChanger> ;
+  ns0:dataType xsd:integer ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TapChanger.step>
+  a rdf:Property ;
+  rdfs:label "step" ;
+  rdfs:comment """Tap changer position.
+Starting step for a steady state solution. Non integer values are allowed to support continuous tap variables. The reasons for continuous value are to support study cases where no discrete tap changer has yet been designed, a solution where a narrow voltage band forces the tap step to oscillate or to accommodate for a continuous solution as input.
+The attribute shall be equal to or greater than lowStep and equal to or less than highStep.""" ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TapChanger> ;
+  ns0:dataType xsd:float ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TapChanger.subsequentDelay>
+  a rdf:Property ;
+  rdfs:label "subsequentDelay" ;
+  rdfs:comment "For an LTC, the delay for subsequent tap changer operation (second and later step changes)." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TapChanger> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Seconds> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#ShortCircuitTest.EnergisedEnd>
+  a rdf:Property ;
+  rdfs:label "EnergisedEnd" ;
+  rdfs:comment "Transformer end that voltage is applied to in this short-circuit test. The test voltage is chosen to induce rated current in the energised end." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#ShortCircuitTest> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#TransformerEndInfo> ;
+  ns0:multiplicity ns0:M:1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#TransformerEndInfo.EnergisedEndShortCircuitTests> .
+
+<http://iec.ch/TC57/CIM100#ShortCircuitTest.GroundedEnds>
+  a rdf:Property ;
+  rdfs:label "GroundedEnds" ;
+  rdfs:comment "All ends short-circuited in this short-circuit test." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#ShortCircuitTest> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#TransformerEndInfo> ;
+  ns0:multiplicity ns0:M:1..n ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#TransformerEndInfo.GroundedEndShortCircuitTests> .
+
+<http://iec.ch/TC57/CIM100#ShortCircuitTest.energisedEndStep>
+  a rdf:Property ;
+  rdfs:label "energisedEndStep" ;
+  rdfs:comment "Tap step number for the energised end of the test pair." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#ShortCircuitTest> ;
+  ns0:dataType xsd:integer ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#ShortCircuitTest.groundedEndStep>
+  a rdf:Property ;
+  rdfs:label "groundedEndStep" ;
+  rdfs:comment "Tap step number for the grounded end of the test pair." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#ShortCircuitTest> ;
+  ns0:dataType xsd:integer ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#ShortCircuitTest.leakageImpedance>
+  a rdf:Property ;
+  rdfs:label "leakageImpedance" ;
+  rdfs:comment "Leakage impedance measured from a positive-sequence or single-phase short-circuit test." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#ShortCircuitTest> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Impedance> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#ShortCircuitTest.leakageImpedanceZero>
+  a rdf:Property ;
+  rdfs:label "leakageImpedanceZero" ;
+  rdfs:comment "Leakage impedance measured from a zero-sequence short-circuit test." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#ShortCircuitTest> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Impedance> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#ShortCircuitTest.loss>
+  a rdf:Property ;
+  rdfs:label "loss" ;
+  rdfs:comment "Load losses from a positive-sequence or single-phase short-circuit test." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#ShortCircuitTest> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#KiloActivePower> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#ShortCircuitTest.lossZero>
+  a rdf:Property ;
+  rdfs:label "lossZero" ;
+  rdfs:comment "Load losses from a zero-sequence short-circuit test." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#ShortCircuitTest> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#KiloActivePower> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#SubGeographicalRegion.Region>
+  a rdf:Property ;
+  rdfs:label "Region" ;
+  rdfs:comment "The geographical region which this sub-geographical region is within." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#SubGeographicalRegion> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#GeographicalRegion> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#GeographicalRegion.Regions> ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#ofAggregate> .
+
+<http://iec.ch/TC57/CIM100#Substation.Region>
+  a rdf:Property ;
+  rdfs:label "Region" ;
+  rdfs:comment "The SubGeographicalRegion containing the substation." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#Substation> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#SubGeographicalRegion> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#SubGeographicalRegion.Substations> ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#ofAggregate> .
+
+<http://iec.ch/TC57/CIM100#RegulatingControl.Terminal>
+  a rdf:Property ;
+  rdfs:label "Terminal" ;
+  rdfs:comment "The terminal associated with this regulating control.  The terminal is associated instead of a node, since the terminal could connect into either a topological node or a connectivity node.  Sometimes it is useful to model regulation at a terminal of a bus bar object." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#RegulatingControl> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#Terminal> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#RegulatingControl.Terminal> .
+
+<http://iec.ch/TC57/CIM100#RegulatingControl.discrete>
+  a rdf:Property ;
+  rdfs:label "discrete" ;
+  rdfs:comment "The regulation is performed in a discrete mode. This applies to equipment with discrete controls, e.g. tap changers and shunt compensators." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#RegulatingControl> ;
+  ns0:dataType xsd:boolean ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#RegulatingControl.enabled>
+  a rdf:Property ;
+  rdfs:label "enabled" ;
+  rdfs:comment "The flag tells if regulation is enabled." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#RegulatingControl> ;
+  ns0:dataType xsd:boolean ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#RegulatingControl.mode>
+  a rdf:Property ;
+  rdfs:label "mode" ;
+  rdfs:comment "The regulating control mode presently available.  This specification allows for determining the kind of regulation without need for obtaining the units from a schedule." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#RegulatingControl> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#RegulatingControlModeKind> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#RegulatingControl.monitoredPhase>
+  a rdf:Property ;
+  rdfs:label "monitoredPhase" ;
+  rdfs:comment "Phase voltage controlling this regulator, measured at regulator location." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#RegulatingControl> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#PhaseCode> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#RegulatingControl.targetDeadband>
+  a rdf:Property ;
+  rdfs:label "targetDeadband" ;
+  rdfs:comment """This is a deadband used with discrete control to avoid excessive update of controls like tap changers and shunt compensator banks while regulating.  The units of those appropriate for the mode. The attribute shall be a positive value or zero. If RegulatingControl.discrete is set to "false", the RegulatingControl.targetDeadband is to be ignored.
+Note that for instance, if the targetValue is 100 kV and the targetDeadband is 2 kV the range is from 99 to 101 kV.""" ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#RegulatingControl> ;
+  ns0:dataType xsd:float ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#RegulatingControl.targetValue>
+  a rdf:Property ;
+  rdfs:label "targetValue" ;
+  rdfs:comment "The target value specified for case input.   This value can be used for the target value without the use of schedules. The value has the units appropriate to the mode attribute." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#RegulatingControl> ;
+  ns0:dataType xsd:float ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TapChangerControl.lineDropCompensation>
+  a rdf:Property ;
+  rdfs:label "lineDropCompensation" ;
+  rdfs:comment "If true, the line drop compensation is to be applied." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TapChangerControl> ;
+  ns0:dataType xsd:boolean ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TapChangerControl.lineDropR>
+  a rdf:Property ;
+  rdfs:label "lineDropR" ;
+  rdfs:comment "Line drop compensator resistance setting for normal (forward) power flow." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TapChangerControl> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Resistance> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TapChangerControl.lineDropX>
+  a rdf:Property ;
+  rdfs:label "lineDropX" ;
+  rdfs:comment "Line drop compensator reactance setting for normal (forward) power flow." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TapChangerControl> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Reactance> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#ACDCTerminal.sequenceNumber>
+  a rdf:Property ;
+  rdfs:label "sequenceNumber" ;
+  rdfs:comment "The orientation of the terminal connections for a multiple terminal conducting equipment.  The sequence numbering starts with 1 and additional terminals should follow in increasing order.   The first terminal is the \"starting point\" for a two terminal branch." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#ACDCTerminal> ;
+  ns0:dataType xsd:integer ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#Terminal.ConductingEquipment>
+  a rdf:Property ;
+  rdfs:label "ConductingEquipment" ;
+  rdfs:comment "The conducting equipment of the terminal.  Conducting equipment have  terminals that may be connected to other conducting equipment terminals via connectivity nodes or topological nodes." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#Terminal> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#ConductingEquipment> ;
+  ns0:multiplicity ns0:M:1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#ConductingEquipment.Terminals> .
+
+<http://iec.ch/TC57/CIM100#Terminal.ConnectivityNode>
+  a rdf:Property ;
+  rdfs:label "ConnectivityNode" ;
+  rdfs:comment "The connectivity node to which this terminal connects with zero impedance." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#Terminal> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#ConnectivityNode> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#ConnectivityNode.Terminals> .
+
+<http://iec.ch/TC57/CIM100#ACDCTerminal.OperationalLimitSet>
+  a rdf:Property ;
+  rdfs:label "OperationalLimitSet" ;
+  rdfs:comment "The operational limit sets at the terminal." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#ACDCTerminal> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#OperationalLimitSet> ;
+  ns0:multiplicity ns0:M:0..n ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#OperationalLimitSet.Terminal> .
+
+<http://iec.ch/TC57/CIM100#TopologicalIsland.AngleRefTopologicalNode>
+  a rdf:Property ;
+  rdfs:label "AngleRefTopologicalNode" ;
+  rdfs:comment "The angle reference for the island.   Normally there is one TopologicalNode that is selected as the angle reference for each island.   Other reference schemes exist, so the association is typically optional." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TopologicalIsland> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#TopologicalNode> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#TopologicalNode.AngleRefTopologicalIsland> .
+
+<http://iec.ch/TC57/CIM100#TopologicalNode.TopologicalIsland>
+  a rdf:Property ;
+  rdfs:label "TopologicalIsland" ;
+  rdfs:comment "A topological node belongs to a topological island." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TopologicalNode> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#TopologicalIsland> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#TopologicalIsland.TopologicalNodes> ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#ofAggregate> .
+
+<http://iec.ch/TC57/CIM100#TransformerCoreAdmittance.TransformerEnd>
+  a rdf:Property ;
+  rdfs:label "TransformerEnd" ;
+  rdfs:comment "All transformer ends having this core admittance." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerCoreAdmittance> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#TransformerEnd> ;
+  ns0:multiplicity ns0:M:0..n ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#TransformerEnd.CoreAdmittance> .
+
+<http://iec.ch/TC57/CIM100#TransformerCoreAdmittance.b>
+  a rdf:Property ;
+  rdfs:label "b" ;
+  rdfs:comment "Magnetizing branch susceptance (B mag).  The value can be positive or negative." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerCoreAdmittance> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Susceptance> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TransformerCoreAdmittance.b0>
+  a rdf:Property ;
+  rdfs:label "b0" ;
+  rdfs:comment "Zero sequence magnetizing branch susceptance." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerCoreAdmittance> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Susceptance> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TransformerCoreAdmittance.g>
+  a rdf:Property ;
+  rdfs:label "g" ;
+  rdfs:comment "Magnetizing branch conductance (G mag)." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerCoreAdmittance> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Conductance> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TransformerCoreAdmittance.g0>
+  a rdf:Property ;
+  rdfs:label "g0" ;
+  rdfs:comment "Zero sequence magnetizing branch conductance." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerCoreAdmittance> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Conductance> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TransformerEndInfo.TransformerTankInfo>
+  a rdf:Property ;
+  rdfs:label "TransformerTankInfo" ;
+  rdfs:comment "Transformer tank data that this end description is part of." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerEndInfo> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#TransformerTankInfo> ;
+  ns0:multiplicity ns0:M:1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#TransformerTankInfo.TransformerEndInfos> .
+
+<http://iec.ch/TC57/CIM100#TransformerEndInfo.connectionKind>
+  a rdf:Property ;
+  rdfs:label "connectionKind" ;
+  rdfs:comment "Kind of connection." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerEndInfo> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#WindingConnection> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TransformerEndInfo.emergencyS>
+  a rdf:Property ;
+  rdfs:label "emergencyS" ;
+  rdfs:comment "Apparent power that the winding can carry under emergency conditions (also called long-term emergency power)." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerEndInfo> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#ApparentPower> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TransformerEndInfo.endNumber>
+  a rdf:Property ;
+  rdfs:label "endNumber" ;
+  rdfs:comment "Number for this transformer end, corresponding to the end's order in the PowerTransformer.vectorGroup attribute. Highest voltage winding should be 1." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerEndInfo> ;
+  ns0:dataType xsd:integer ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TransformerEndInfo.insulationU>
+  a rdf:Property ;
+  rdfs:label "insulationU" ;
+  rdfs:comment "Basic insulation level voltage rating." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerEndInfo> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Voltage> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TransformerEndInfo.phaseAngleClock>
+  a rdf:Property ;
+  rdfs:label "phaseAngleClock" ;
+  rdfs:comment "Winding phase angle where 360 degrees are represented with clock hours, so the valid values are {0, ..., 11}. For example, to express the second winding in code 'Dyn11', set attributes as follows: 'endNumber'=2, 'connectionKind' = Yn and 'phaseAngleClock' = 11." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerEndInfo> ;
+  ns0:dataType xsd:integer ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TransformerEndInfo.r>
+  a rdf:Property ;
+  rdfs:label "r" ;
+  rdfs:comment "DC resistance." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerEndInfo> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Resistance> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TransformerEndInfo.ratedS>
+  a rdf:Property ;
+  rdfs:label "ratedS" ;
+  rdfs:comment "Normal apparent power rating." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerEndInfo> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#ApparentPower> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TransformerEndInfo.ratedU>
+  a rdf:Property ;
+  rdfs:label "ratedU" ;
+  rdfs:comment "Rated voltage: phase-phase for three-phase windings, and either phase-phase or phase-neutral for single-phase windings." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerEndInfo> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Voltage> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TransformerEndInfo.shortTermS>
+  a rdf:Property ;
+  rdfs:label "shortTermS" ;
+  rdfs:comment "Apparent power that this winding can carry for a short period of time (in emergency)." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerEndInfo> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#ApparentPower> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TransformerMeshImpedance.FromTransformerEnd>
+  a rdf:Property ;
+  rdfs:label "FromTransformerEnd" ;
+  rdfs:comment "From end this mesh impedance is connected to. It determines the voltage reference." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerMeshImpedance> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#TransformerEnd> ;
+  ns0:multiplicity ns0:M:1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#TransformerEnd.FromMeshImpedance> .
+
+<http://iec.ch/TC57/CIM100#TransformerMeshImpedance.ToTransformerEnd>
+  a rdf:Property ;
+  rdfs:label "ToTransformerEnd" ;
+  rdfs:comment "All transformer ends this mesh impedance is connected to." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerMeshImpedance> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#TransformerEnd> ;
+  ns0:multiplicity ns0:M:1..n ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#TransformerEnd.ToMeshImpedance> .
+
+<http://iec.ch/TC57/CIM100#TransformerMeshImpedance.r>
+  a rdf:Property ;
+  rdfs:label "r" ;
+  rdfs:comment "Resistance between the 'from' and the 'to' end, seen from the 'from' end." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerMeshImpedance> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Resistance> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TransformerMeshImpedance.r0>
+  a rdf:Property ;
+  rdfs:label "r0" ;
+  rdfs:comment "Zero-sequence resistance between the 'from' and the 'to' end, seen from the 'from' end." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerMeshImpedance> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Resistance> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TransformerMeshImpedance.x>
+  a rdf:Property ;
+  rdfs:label "x" ;
+  rdfs:comment "Reactance between the 'from' and the 'to' end, seen from the 'from' end." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerMeshImpedance> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Reactance> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TransformerMeshImpedance.x0>
+  a rdf:Property ;
+  rdfs:label "x0" ;
+  rdfs:comment "Zero-sequence reactance between the 'from' and the 'to' end, seen from the 'from' end." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerMeshImpedance> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Reactance> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#TransformerTank.PowerTransformer>
+  a rdf:Property ;
+  rdfs:label "PowerTransformer" ;
+  rdfs:comment "Bank this transformer belongs to." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerTank> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#PowerTransformer> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#PowerTransformer.TransformerTanks> .
+
+<http://iec.ch/TC57/CIM100#TransformerTankEnd.TransformerTank>
+  a rdf:Property ;
+  rdfs:label "TransformerTank" ;
+  rdfs:comment "Transformer this winding belongs to." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#TransformerTankEnd> ;
+  rdfs:range <http://iec.ch/TC57/CIM100#TransformerTank> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:inverseRoleName <http://iec.ch/TC57/CIM100#TransformerTank.TransformerTankEnds> .
+
+<http://iec.ch/TC57/CIM100#VoltageLimit.value>
+  a rdf:Property ;
+  rdfs:label "value" ;
+  rdfs:comment "Limit on voltage. High or low limit nature of the limit depends upon the properties of the operational limit type. The attribute shall be a positive value or zero." ;
+  rdfs:domain <http://iec.ch/TC57/CIM100#VoltageLimit> ;
+  ns0:dataType <http://iec.ch/TC57/CIM100#Voltage> ;
+  ns0:multiplicity ns0:M:0..1 ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#attribute> .
+
+<http://iec.ch/TC57/CIM100#OperationalLimitDirectionKind>
+  a rdfs:Class ;
+  rdfs:label "#OperationalLimitDirectionKind" ;
+  rdfs:comment "The direction attribute describes the side of  a limit that is a violation." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_OperationalLimits> ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#enumeration> .
+
+<http://iec.ch/TC57/CIM100#OperationalLimitDirectionKind.absoluteValue>
+  a <http://iec.ch/TC57/CIM100#OperationalLimitDirectionKind> ;
+  rdfs:label "absoluteValue" ;
+  rdfs:comment "An absoluteValue limit means that a monitored absolute value above the limit value is a violation." ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#ConductingEquipment> .
+
+<http://iec.ch/TC57/CIM100#OperationalLimitDirectionKind.high>
+  a <http://iec.ch/TC57/CIM100#OperationalLimitDirectionKind> ;
+  rdfs:label "high" ;
+  rdfs:comment "High means that a monitored value above the limit value is a violation.   If applied to a terminal flow, the positive direction is into the terminal." .
+
+<http://iec.ch/TC57/CIM100#OperationalLimitDirectionKind.low>
+  a <http://iec.ch/TC57/CIM100#OperationalLimitDirectionKind> ;
+  rdfs:label "low" ;
+  rdfs:comment "Low means a monitored value below the limit is a violation.  If applied to a terminal flow, the positive direction is into the terminal." .
+
+<http://iec.ch/TC57/CIM100#PhaseCode>
+  a rdfs:Class ;
+  rdfs:label "#PhaseCode" ;
+  rdfs:comment """An unordered enumeration of phase identifiers.  Allows designation of phases for both transmission and distribution equipment, circuits and loads.   The enumeration, by itself, does not describe how the phases are connected together or connected to ground.  Ground is not explicitly denoted as a phase.
+Residential and small commercial loads are often served from single-phase, or split-phase, secondary circuits. For the example of s12N, phases 1 and 2 refer to hot wires that are 180 degrees out of phase, while N refers to the neutral wire. Through single-phase transformer connections, these secondary circuits may be served from one or two of the primary phases A, B, and C. For three-phase loads, use the A, B, C phase codes instead of s12N.
+The integer values are from IEC 61968-9 to support revenue metering applications.""" ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Core> ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#enumeration> .
+
+<http://iec.ch/TC57/CIM100#PhaseCode.A>
+  a <http://iec.ch/TC57/CIM100#PhaseCode> ;
+  rdfs:label "A" ;
+  rdfs:comment "Phase A." .
+
+<http://iec.ch/TC57/CIM100#PhaseCode.AB>
+  a <http://iec.ch/TC57/CIM100#PhaseCode> ;
+  rdfs:label "AB" ;
+  rdfs:comment "Phases A and B." .
+
+<http://iec.ch/TC57/CIM100#PhaseCode.ABC>
+  a <http://iec.ch/TC57/CIM100#PhaseCode> ;
+  rdfs:label "ABC" ;
+  rdfs:comment "Phases A, B, and C." .
+
+<http://iec.ch/TC57/CIM100#PhaseCode.ABCN>
+  a <http://iec.ch/TC57/CIM100#PhaseCode> ;
+  rdfs:label "ABCN" ;
+  rdfs:comment "Phases A, B, C, and N." .
+
+<http://iec.ch/TC57/CIM100#PhaseCode.ABN>
+  a <http://iec.ch/TC57/CIM100#PhaseCode> ;
+  rdfs:label "ABN" ;
+  rdfs:comment "Phases A, B, and neutral." .
+
+<http://iec.ch/TC57/CIM100#PhaseCode.AC>
+  a <http://iec.ch/TC57/CIM100#PhaseCode> ;
+  rdfs:label "AC" ;
+  rdfs:comment "Phases A and C." .
+
+<http://iec.ch/TC57/CIM100#PhaseCode.ACN>
+  a <http://iec.ch/TC57/CIM100#PhaseCode> ;
+  rdfs:label "ACN" ;
+  rdfs:comment "Phases A, C and neutral." .
+
+<http://iec.ch/TC57/CIM100#PhaseCode.AN>
+  a <http://iec.ch/TC57/CIM100#PhaseCode> ;
+  rdfs:label "AN" ;
+  rdfs:comment "Phases A and neutral." .
+
+<http://iec.ch/TC57/CIM100#PhaseCode.B>
+  a <http://iec.ch/TC57/CIM100#PhaseCode> ;
+  rdfs:label "B" ;
+  rdfs:comment "Phase B." ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#IdentifiedObject> .
+
+<http://iec.ch/TC57/CIM100#PhaseCode.BC>
+  a <http://iec.ch/TC57/CIM100#PhaseCode> ;
+  rdfs:label "BC" ;
+  rdfs:comment "Phases B and C." .
+
+<http://iec.ch/TC57/CIM100#PhaseCode.BCN>
+  a <http://iec.ch/TC57/CIM100#PhaseCode> ;
+  rdfs:label "BCN" ;
+  rdfs:comment "Phases B, C, and neutral." .
+
+<http://iec.ch/TC57/CIM100#PhaseCode.BN>
+  a <http://iec.ch/TC57/CIM100#PhaseCode> ;
+  rdfs:label "BN" ;
+  rdfs:comment "Phases B and neutral." .
+
+<http://iec.ch/TC57/CIM100#PhaseCode.C>
+  a <http://iec.ch/TC57/CIM100#PhaseCode> ;
+  rdfs:label "C" ;
+  rdfs:comment "Phase C." .
+
+<http://iec.ch/TC57/CIM100#PhaseCode.CN>
+  a <http://iec.ch/TC57/CIM100#PhaseCode> ;
+  rdfs:label "CN" ;
+  rdfs:comment "Phases C and neutral." .
+
+<http://iec.ch/TC57/CIM100#PhaseCode.N>
+  a <http://iec.ch/TC57/CIM100#PhaseCode> ;
+  rdfs:label "N" ;
+  rdfs:comment "Neutral phase." .
+
+<http://iec.ch/TC57/CIM100#PhaseCode.X>
+  a <http://iec.ch/TC57/CIM100#PhaseCode> ;
+  rdfs:label "X" ;
+  rdfs:comment "Unknown non-neutral phase." .
+
+<http://iec.ch/TC57/CIM100#PhaseCode.XN>
+  a <http://iec.ch/TC57/CIM100#PhaseCode> ;
+  rdfs:label "XN" ;
+  rdfs:comment "Unknown non-neutral phase plus neutral." .
+
+<http://iec.ch/TC57/CIM100#PhaseCode.XY>
+  a <http://iec.ch/TC57/CIM100#PhaseCode> ;
+  rdfs:label "XY" ;
+  rdfs:comment "Two unknown non-neutral phases." .
+
+<http://iec.ch/TC57/CIM100#PhaseCode.XYN>
+  a <http://iec.ch/TC57/CIM100#PhaseCode> ;
+  rdfs:label "XYN" ;
+  rdfs:comment "Two unknown non-neutral phases plus neutral." .
+
+<http://iec.ch/TC57/CIM100#PhaseCode.none>
+  a <http://iec.ch/TC57/CIM100#PhaseCode> ;
+  rdfs:label "none" ;
+  rdfs:comment "No phases specified." .
+
+<http://iec.ch/TC57/CIM100#PhaseCode.s1>
+  a <http://iec.ch/TC57/CIM100#PhaseCode> ;
+  rdfs:label "s1" ;
+  rdfs:comment "Secondary phase 1." .
+
+<http://iec.ch/TC57/CIM100#PhaseCode.s12>
+  a <http://iec.ch/TC57/CIM100#PhaseCode> ;
+  rdfs:label "s12" ;
+  rdfs:comment "Secondary phase 1 and 2." ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#IdentifiedObject> .
+
+<http://iec.ch/TC57/CIM100#PhaseCode.s12N>
+  a <http://iec.ch/TC57/CIM100#PhaseCode> ;
+  rdfs:label "s12N" ;
+  rdfs:comment "Secondary phases 1, 2, and neutral." .
+
+<http://iec.ch/TC57/CIM100#PhaseCode.s1N>
+  a <http://iec.ch/TC57/CIM100#PhaseCode> ;
+  rdfs:label "s1N" ;
+  rdfs:comment "Secondary phase 1 and neutral." ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#OperationalLimit> .
+
+<http://iec.ch/TC57/CIM100#PhaseCode.s2>
+  a <http://iec.ch/TC57/CIM100#PhaseCode> ;
+  rdfs:label "s2" ;
+  rdfs:comment "Secondary phase 2." ;
+  rdfs:subClassOf <http://iec.ch/TC57/CIM100#IdentifiedObject> .
+
+<http://iec.ch/TC57/CIM100#PhaseCode.s2N>
+  a <http://iec.ch/TC57/CIM100#PhaseCode> ;
+  rdfs:label "s2N" ;
+  rdfs:comment "Secondary phase 2 and neutral." .
+
+<http://iec.ch/TC57/CIM100#PhaseShuntConnectionKind>
+  a rdfs:Class ;
+  rdfs:label "#PhaseShuntConnectionKind" ;
+  rdfs:comment "The configuration of phase connections for a single terminal device such as a load or capacitor." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Wires> ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#enumeration> .
+
+<http://iec.ch/TC57/CIM100#PhaseShuntConnectionKind.D>
+  a <http://iec.ch/TC57/CIM100#PhaseShuntConnectionKind> ;
+  rdfs:label "D" ;
+  rdfs:comment "Delta connection." .
+
+<http://iec.ch/TC57/CIM100#PhaseShuntConnectionKind.G>
+  a <http://iec.ch/TC57/CIM100#PhaseShuntConnectionKind> ;
+  rdfs:label "G" ;
+  rdfs:comment "Ground connection; use when explicit connection to ground needs to be expressed in combination with the phase code, such as for electrical wire/cable or for meters." .
+
+<http://iec.ch/TC57/CIM100#PhaseShuntConnectionKind.I>
+  a <http://iec.ch/TC57/CIM100#PhaseShuntConnectionKind> ;
+  rdfs:label "I" ;
+  rdfs:comment "Independent winding, for single-phase connections." .
+
+<http://iec.ch/TC57/CIM100#PhaseShuntConnectionKind.Y>
+  a <http://iec.ch/TC57/CIM100#PhaseShuntConnectionKind> ;
+  rdfs:label "Y" ;
+  rdfs:comment "Wye connection." .
+
+<http://iec.ch/TC57/CIM100#PhaseShuntConnectionKind.Yn>
+  a <http://iec.ch/TC57/CIM100#PhaseShuntConnectionKind> ;
+  rdfs:label "Yn" ;
+  rdfs:comment "Wye, with neutral brought out for grounding." .
+
+<http://iec.ch/TC57/CIM100#RegulatingControlModeKind>
+  a rdfs:Class ;
+  rdfs:label "#RegulatingControlModeKind" ;
+  rdfs:comment "The kind of regulation model.   For example regulating voltage, reactive power, active power, etc." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Wires> ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#enumeration> .
+
+<http://iec.ch/TC57/CIM100#RegulatingControlModeKind.activePower>
+  a <http://iec.ch/TC57/CIM100#RegulatingControlModeKind> ;
+  rdfs:label "activePower" ;
+  rdfs:comment "Active power is specified." .
+
+<http://iec.ch/TC57/CIM100#RegulatingControlModeKind.admittance>
+  a <http://iec.ch/TC57/CIM100#RegulatingControlModeKind> ;
+  rdfs:label "admittance" ;
+  rdfs:comment "Admittance is specified." .
+
+<http://iec.ch/TC57/CIM100#RegulatingControlModeKind.currentFlow>
+  a <http://iec.ch/TC57/CIM100#RegulatingControlModeKind> ;
+  rdfs:label "currentFlow" ;
+  rdfs:comment "Current flow is specified." .
+
+<http://iec.ch/TC57/CIM100#RegulatingControlModeKind.powerFactor>
+  a <http://iec.ch/TC57/CIM100#RegulatingControlModeKind> ;
+  rdfs:label "powerFactor" ;
+  rdfs:comment "Power factor is specified." .
+
+<http://iec.ch/TC57/CIM100#RegulatingControlModeKind.reactivePower>
+  a <http://iec.ch/TC57/CIM100#RegulatingControlModeKind> ;
+  rdfs:label "reactivePower" ;
+  rdfs:comment "Reactive power is specified." .
+
+<http://iec.ch/TC57/CIM100#RegulatingControlModeKind.temperature>
+  a <http://iec.ch/TC57/CIM100#RegulatingControlModeKind> ;
+  rdfs:label "temperature" ;
+  rdfs:comment "Control switches on/off based on the local temperature (i.e., a thermostat)." .
+
+<http://iec.ch/TC57/CIM100#RegulatingControlModeKind.timeScheduled>
+  a <http://iec.ch/TC57/CIM100#RegulatingControlModeKind> ;
+  rdfs:label "timeScheduled" ;
+  rdfs:comment "Control switches on/off by time of day. The times may change on the weekend, or in different seasons." .
+
+<http://iec.ch/TC57/CIM100#RegulatingControlModeKind.voltage>
+  a <http://iec.ch/TC57/CIM100#RegulatingControlModeKind> ;
+  rdfs:label "voltage" ;
+  rdfs:comment "Voltage is specified." .
+
+<http://iec.ch/TC57/CIM100#SinglePhaseKind>
+  a rdfs:Class ;
+  rdfs:label "#SinglePhaseKind" ;
+  rdfs:comment "Enumeration of single phase identifiers. Allows designation of single phases for both transmission and distribution equipment, circuits and loads." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Wires> ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#enumeration> .
+
+<http://iec.ch/TC57/CIM100#SinglePhaseKind.A>
+  a <http://iec.ch/TC57/CIM100#SinglePhaseKind> ;
+  rdfs:label "A" ;
+  rdfs:comment "Phase A." .
+
+<http://iec.ch/TC57/CIM100#SinglePhaseKind.B>
+  a <http://iec.ch/TC57/CIM100#SinglePhaseKind> ;
+  rdfs:label "B" ;
+  rdfs:comment "Phase B." .
+
+<http://iec.ch/TC57/CIM100#SinglePhaseKind.C>
+  a <http://iec.ch/TC57/CIM100#SinglePhaseKind> ;
+  rdfs:label "C" ;
+  rdfs:comment "Phase C." .
+
+<http://iec.ch/TC57/CIM100#SinglePhaseKind.N>
+  a <http://iec.ch/TC57/CIM100#SinglePhaseKind> ;
+  rdfs:label "N" ;
+  rdfs:comment "Neutral." .
+
+<http://iec.ch/TC57/CIM100#SinglePhaseKind.s1>
+  a <http://iec.ch/TC57/CIM100#SinglePhaseKind> ;
+  rdfs:label "s1" ;
+  rdfs:comment "Secondary phase 1." .
+
+<http://iec.ch/TC57/CIM100#SinglePhaseKind.s2>
+  a <http://iec.ch/TC57/CIM100#SinglePhaseKind> ;
+  rdfs:label "s2" ;
+  rdfs:comment "Secondary phase 2." .
+
+<http://iec.ch/TC57/CIM100#WindingConnection>
+  a rdfs:Class ;
+  rdfs:label "#WindingConnection" ;
+  rdfs:comment "Winding connection type." ;
+  ns0:belongsToCategory <http://iec.ch/TC57/CIM100#Package_Wires> ;
+  ns0:stereotype <http://langdale.com.au/2005/UML#enumeration> .
+
+<http://iec.ch/TC57/CIM100#WindingConnection.A>
+  a <http://iec.ch/TC57/CIM100#WindingConnection> ;
+  rdfs:label "A" ;
+  rdfs:comment "Autotransformer common winding." .
+
+<http://iec.ch/TC57/CIM100#WindingConnection.D>
+  a <http://iec.ch/TC57/CIM100#WindingConnection> ;
+  rdfs:label "D" ;
+  rdfs:comment "Delta." .
+
+<http://iec.ch/TC57/CIM100#WindingConnection.I>
+  a <http://iec.ch/TC57/CIM100#WindingConnection> ;
+  rdfs:label "I" ;
+  rdfs:comment "Independent winding, for single-phase connections." .
+
+<http://iec.ch/TC57/CIM100#WindingConnection.Y>
+  a <http://iec.ch/TC57/CIM100#WindingConnection> ;
+  rdfs:label "Y" ;
+  rdfs:comment "Wye." .
+
+<http://iec.ch/TC57/CIM100#WindingConnection.Yn>
+  a <http://iec.ch/TC57/CIM100#WindingConnection> ;
+  rdfs:label "Yn" ;
+  rdfs:comment "Wye, with neutral brought out for grounding." .
+
+<http://iec.ch/TC57/CIM100#WindingConnection.Z>
+  a <http://iec.ch/TC57/CIM100#WindingConnection> ;
+  rdfs:label "Z" ;
+  rdfs:comment "ZigZag." .
+
+<http://iec.ch/TC57/CIM100#WindingConnection.Zn>
+  a <http://iec.ch/TC57/CIM100#WindingConnection> ;
+  rdfs:label "Zn" ;
+  rdfs:comment "ZigZag, with neutral brought out for grounding." .
