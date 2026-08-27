@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>CIM RDF Explorer</title>
+
+    <link
+        rel="stylesheet"
+        href="/style.css"
+    >
+
+</head>
+<body>
+<header>
+
+    <h1>CIM RDF Explorer</h1>
+
+    <p>
+        Generički pregled i grupisanje RDF podataka
+    </p>
+
+</header>
+<main>
+
+    <section class="card">
+
+        <h2>1. Izbor klase</h2>
+
+        <label for="classSelect">
+            Klasa:
+        </label>
+
+        <select id="classSelect">
+
+            <option value="">
+                -- Izaberi klasu --
+            </option>
+
+        </select>
+
+    </section>
+
+    <section
+        id="propertySection"
+        class="card hidden"
+    >
+        <h2>2. Izbor relacije za grupisanje</h2>
+
+        <label for="propertySelect">
+            Relacija:
+        </label>
+
+        <select id="propertySelect">
+
+            <option value="">
+                -- Izaberi relaciju --
+            </option>
+
+        </select>
+
+        <p id="propertyDescription"></p>
+
+    </section>
+
+    <section
+        id="groupSection"
+        class="card hidden"
+    >
+        <h2>3. Grupe</h2>
+
+        <div id="groups"></div>
+
+    </section>
+
+    <section
+        id="status"
+        class="status"
+    >
+        Učitavanje RDF modela...
+    </section>
+</main>
+<script>
+
+const classSelect = document.getElementById('classSelect');
+const propertySelect = document.getElementById('propertySelect');
+const propertySection = document.getElementById('propertySection');
+const groupSection = document.getElementById('groupSection');
+const propertyDescription = document.getElementById('propertyDescription');
+const groups = document.getElementById('groups');
+const status = document.getElementById('status');
+
+async function loadClasses() {
+    try {
+        const response = await fetch('/api/classes');
+        const classes = await response.json();
+
+        classes.forEach(cimClass => {
+            const option = document.createElement('option');
+            option.value = cimClass.uri;
+            option.textContent = cimClass.name;
+            classSelect.appendChild(option);
+        });
+
+        status.textContent = `Učitano ${classes.length} klasa.`;
+
+    }
+    catch (error) {
+        console.error(error);
+        status.textContent = 'Greška prilikom učitavanja klasa.';
+    }
+}
+
+classSelect.addEventListener('change', async function () {
+
+        const classUri = this.value;
+
+        propertySelect.innerHTML = `
+            <option value="">
+                -- Izaberi relaciju --
+            </option>
+        `;
+
+        groups.innerHTML = '';
+        groupSection.classList.add('hidden');
+
+        if (!classUri) {
+
+            propertySection.classList.add('hidden');
+            return;
+        }
+
+
+        try {
+
+            status.textContent = 'Učitavanje relacija...';
+
+            const response = await fetch(`/api/properties?class=${encodeURIComponent(classUri)}`);
+            const properties = await response.json();
+
+            properties.forEach(property => {
+                const option = document.createElement('option');
+                option.value = property.uri;
+                option.textContent = property.name;
+                option.dataset.comment = property.comment || '';
+                propertySelect.appendChild(option);
+            });
+
+            propertySection.classList.remove('hidden');
+            status.textContent = `Pronađeno ${properties.length} relacija.`;
+        }
+        catch (error) {
+            console.error(error);
+            status.textContent = 'Greška prilikom učitavanja relacija.';
+        }
+    }
+);
+
+propertySelect.addEventListener('change', async function () {
+
+        const propertyUri = this.value;
+        const classUri = classSelect.value;
+        groups.innerHTML = '';
+        groupSection.classList.add('hidden');
+
+        if (!propertyUri || !classUri) {
+            return;
+        }
+
+        const selectedOption = this.options[this.selectedIndex];
+        propertyDescription.textContent = selectedOption.dataset.comment || '';
+
+        try {
+            status.textContent = 'Grupisanje podataka...';
+
+            const response = await fetch(`/api/group?class=${encodeURIComponent(classUri)}&property=${encodeURIComponent(propertyUri)}`);
+            const data = await response.json();
+
+            if (!Array.isArray(data) || data.length === 0) {
+
+                groups.innerHTML = '<p>Nema podataka za izabranu relaciju.</p>';
+                groupSection.classList.remove('hidden');
+                status.textContent = 'Nema podataka za grupisanje.';
+
+                return;
+            }
+
+            data.forEach(group => {
+
+                const groupElement = document.createElement('div');
+                groupElement.className = 'group';
+                const title = document.createElement('h3');
+                title.textContent = group.name;
+                const type = document.createElement('p');
+
+                if (group.type) {
+                    type.textContent = `Tip: ${group.type}`;
+                }
+
+                const list = document.createElement('div');
+                group.items.forEach(item => {
+
+                    const element = document.createElement('div');
+                    element.className = 'group-item';
+                    element.textContent = item.name;
+                    list.appendChild(element);
+                });
+
+                groupElement.appendChild(title);
+
+                if (group.type) {
+                    groupElement.appendChild(type);
+                }
+
+                groupElement.appendChild(list);
+                groups.appendChild(groupElement);
+            });
+
+            groupSection.classList.remove('hidden');
+            status.textContent = `Pronađeno ${data.length} grupa.`;
+
+        }
+        catch (error) {
+
+            console.error(error);
+            status.textContent = 'Greška prilikom grupisanja podataka.';
+        }
+    }
+);
+
+loadClasses();
+
+</script>
+</body>
+</html>
