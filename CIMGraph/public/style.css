@@ -191,6 +191,11 @@ select {
     margin-bottom: 15px;
     border: 1px solid #ddd;
     border-radius: 8px;
+    cursor: pointer;
+}
+
+.group:hover {
+    transform: translateY(-2px);
 }
 
 .group h3 {
@@ -206,4 +211,75 @@ select {
 
 .hidden {
     display: none;
+}
+
+.d3-graph {
+
+    width: 100%;
+    height: 650px;
+
+    border: 1px solid #ccc;
+    border-radius: 8px;
+
+    overflow: hidden;
+
+    background: #fafafa;
+}
+
+
+.d3-graph svg {
+
+    display: block;
+
+    width: 100%;
+    height: 100%;
+}
+
+
+.graph-link {
+
+    stroke: #999;
+    stroke-opacity: 0.6;
+    stroke-width: 1.5px;
+}
+
+
+.graph-node circle {
+
+    fill: #4f81bd;
+    stroke: #ffffff;
+    stroke-width: 1.5px;
+
+    cursor: pointer;
+}
+
+
+.graph-node text {
+
+    font-size: 11px;
+
+    pointer-events: none;
+
+    user-select: none;
+}
+
+
+.graph-node:hover circle {
+
+    stroke: #000;
+    stroke-width: 2px;
+}
+
+
+.graph-info {
+
+    display: flex;
+    gap: 30px;
+
+    margin-bottom: 15px;
+}
+
+.edge-label {
+    font-size: 9px;
+    pointer-events: none;
 }

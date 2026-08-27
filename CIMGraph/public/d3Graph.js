@@ -1,0 +1,116 @@
+export class D3Graph {
+
+    constructor(container) {
+
+        this.container = container;
+
+        this.svg = null;
+        this.simulation = null;
+
+        this.width = 0;
+        this.height = 0;
+    }
+
+
+    render(graph) {
+
+        this.clear();
+
+        this.width = this.container.clientWidth || 1000;
+        this.height = 650;
+
+        this.svg = d3
+            .select(this.container)
+            .append('svg')
+            .attr('width', this.width)
+            .attr('height', this.height)
+            .attr('viewBox', `0 0 ${this.width} ${this.height}`);
+
+        const zoomLayer = this.svg.append('g').attr('class', 'zoom-layer');
+
+        this.svg.call(
+            d3.zoom().scaleExtent([0.1, 5]).on('zoom', event => {
+                    zoomLayer.attr(
+                        'transform',
+                        event.transform
+                    );
+                })
+        );
+
+        const linksLayer = zoomLayer.append('g').attr('class', 'links');
+        const nodesLayer = zoomLayer.append('g').attr('class', 'nodes');
+        const link = linksLayer.selectAll('g').data(graph.edges).enter().append('g').attr('class', 'graph-edge');
+
+        link.append('line').attr('class', 'graph-link');
+        link.append('text').attr('class', 'edge-label').text(d => d.propertyName || '');
+
+        const node = nodesLayer.selectAll('g').data(graph.nodes).enter().append('g').attr('class', 'graph-node');
+
+        node.append('circle').attr('r', 9);
+        node.append('text').text(d => d.name).attr('dx', 13).attr('dy', 4);
+        node.append('title').text(d => {
+                if (d.type) {
+                    return `${d.name}\nTip: ${d.type}`;
+                }
+
+                return d.name;
+            });
+        node.call(
+            d3.drag().on('start', (event, d) => {
+                    if (!event.active) {
+                        this.simulation.alphaTarget(0.3).restart();
+                    }
+
+                    d.fx = d.x;
+                    d.fy = d.y;
+                }).on('drag', (event, d) => {
+
+                    d.fx = event.x;
+                    d.fy = event.y;
+                }).on('end', (event, d) => {
+
+                    if (!event.active) {
+                        this.simulation.alphaTarget(0);
+                    }
+
+                    d.fx = null;
+                    d.fy = null;
+                })
+        );
+
+        this.simulation = d3.forceSimulation(graph.nodes).force('link', d3.forceLink(graph.edges).id(d => d.id).distance(120))
+            .force('charge', d3.forceManyBody().strength(-300))
+            .force('center', d3.forceCenter(this.width / 2, this.height / 2))
+            .force('collision', d3.forceCollide().radius(25));
+
+        this.simulation.on('tick', () => {
+            link.select('line').attr('x1', d => d.source.x)
+                .attr('y1', d => d.source.y)
+                .attr('x2', d => d.target.x)
+                .attr('y2', d => d.target.y);
+
+            link.select('text')
+                .attr('x', d => (d.source.x + d.target.x) / 2)
+                .attr('y', d => (d.source.y + d.target.y) / 2);
+
+            node.attr('transform', d => `translate(${d.x},${d.y})`);
+        });
+    }
+
+    clear() {
+
+        if (this.simulation) {
+
+            this.simulation.stop();
+            this.simulation = null;
+        }
+
+        if (this.svg) {
+
+            this.svg.remove();
+            this.svg = null;
+        }
+
+        this.container.innerHTML = '';
+    }
+}

@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="bs">
+
 <head>
 
     <meta charset="UTF-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
@@ -15,22 +17,68 @@
         href="/style.css"
     >
 
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
 </head>
+
+
 <body>
+
 <header>
 
     <h1>CIM RDF Explorer</h1>
 
     <p>
-        Generički pregled i grupisanje RDF podataka
+        Generička vizuelizacija CIM/RDF modela
     </p>
 
 </header>
+
+
 <main>
+
+
+    <!-- IZBOR TIPA PRIKAZA -->
 
     <section class="card">
 
-        <h2>1. Izbor klase</h2>
+        <h2>1. Izbor prikaza</h2>
+
+        <label for="graphTypeSelect">
+            Prikaz:
+        </label>
+
+        <select id="graphTypeSelect">
+
+            <option value="">
+                -- Izaberi prikaz --
+            </option>
+
+            <option value="classes">
+                Klase
+            </option>
+
+            <option value="properties">
+                Properties
+            </option>
+
+            <option value="groups">
+                Grupe
+            </option>
+
+        </select>
+
+    </section>
+
+
+    <!-- IZBOR KLASE -->
+
+    <section
+        id="classSection"
+        class="card hidden"
+    >
+
+        <h2>2. Izbor klase</h2>
 
         <label for="classSelect">
             Klasa:
@@ -46,11 +94,15 @@
 
     </section>
 
+
+    <!-- IZBOR PROPERTY-JA -->
+
     <section
         id="propertySection"
         class="card hidden"
     >
-        <h2>2. Izbor relacije za grupisanje</h2>
+
+        <h2>3. Izbor relacije</h2>
 
         <label for="propertySelect">
             Relacija:
@@ -68,57 +120,331 @@
 
     </section>
 
+
+    <!-- GRUPE -->
+
     <section
         id="groupSection"
         class="card hidden"
     >
-        <h2>3. Grupe</h2>
+
+        <h2>4. Grupe</h2>
 
         <div id="groups"></div>
 
     </section>
 
+
+    <!-- GRAF -->
+
+    <section
+        id="graphSection"
+        class="card hidden"
+    >
+
+        <h2 id="graphTitle">
+            Graf povezanosti
+        </h2>
+
+        <div class="graph-info">
+
+            <span>
+                Čvorovi:
+                <strong id="nodeCount">0</strong>
+            </span>
+
+            <span>
+                Veze:
+                <strong id="edgeCount">0</strong>
+            </span>
+
+        </div>
+
+
+        <div
+            id="d3Graph"
+            class="d3-graph"
+        ></div>
+
+    </section>
+
+
+    <!-- STATUS -->
+
     <section
         id="status"
         class="status"
     >
-        Učitavanje RDF modela...
-    </section>
-</main>
-<script>
 
-const classSelect = document.getElementById('classSelect');
-const propertySelect = document.getElementById('propertySelect');
-const propertySection = document.getElementById('propertySection');
-const groupSection = document.getElementById('groupSection');
-const propertyDescription = document.getElementById('propertyDescription');
-const groups = document.getElementById('groups');
-const status = document.getElementById('status');
+        Učitavanje RDF modela...
+
+    </section>
+
+
+</main>
+
+
+<script type="module">
+
+import { D3Graph } from '/d3Graph.js';
+
+
+const graphTypeSelect =
+    document.getElementById('graphTypeSelect');
+
+const classSelect =
+    document.getElementById('classSelect');
+
+const propertySelect =
+    document.getElementById('propertySelect');
+
+const classSection =
+    document.getElementById('classSection');
+
+const propertySection =
+    document.getElementById('propertySection');
+
+const groupSection =
+    document.getElementById('groupSection');
+
+const groups =
+    document.getElementById('groups');
+
+const propertyDescription =
+    document.getElementById('propertyDescription');
+
+const graphSection =
+    document.getElementById('graphSection');
+
+const graphTitle =
+    document.getElementById('graphTitle');
+
+const d3Container =
+    document.getElementById('d3Graph');
+
+const nodeCount =
+    document.getElementById('nodeCount');
+
+const edgeCount =
+    document.getElementById('edgeCount');
+
+const status =
+    document.getElementById('status');
+
+
+const d3Graph =
+    new D3Graph(d3Container);
+
+
+/*
+ * UČITAVANJE KLASA
+ */
 
 async function loadClasses() {
+
     try {
-        const response = await fetch('/api/classes');
-        const classes = await response.json();
+
+        const response =
+            await fetch('/api/classes');
+
+        const classes =
+            await response.json();
+
+
+        classSelect.innerHTML = `
+            <option value="">
+                -- Izaberi klasu --
+            </option>
+        `;
+
 
         classes.forEach(cimClass => {
-            const option = document.createElement('option');
-            option.value = cimClass.uri;
-            option.textContent = cimClass.name;
+
+            const option =
+                document.createElement('option');
+
+            option.value =
+                cimClass.uri;
+
+            option.textContent =
+                cimClass.name;
+
             classSelect.appendChild(option);
         });
 
-        status.textContent = `Učitano ${classes.length} klasa.`;
+
+        status.textContent =
+            `Učitano ${classes.length} klasa.`;
 
     }
     catch (error) {
+
         console.error(error);
-        status.textContent = 'Greška prilikom učitavanja klasa.';
+
+        status.textContent =
+            'Greška prilikom učitavanja klasa.';
     }
 }
 
-classSelect.addEventListener('change', async function () {
 
-        const classUri = this.value;
+/*
+ * UČITAVANJE GRAFA
+ */
+
+async function loadGraph(url, title) {
+
+    try {
+
+        status.textContent =
+            'Učitavanje grafa...';
+
+
+        const response =
+            await fetch(url);
+
+
+        if (!response.ok) {
+
+            const error =
+                await response.json();
+
+            throw new Error(
+                error.error || 'Greška prilikom učitavanja grafa.'
+            );
+        }
+
+
+        const graph =
+            await response.json();
+
+
+        nodeCount.textContent =
+            graph.nodes.length;
+
+        edgeCount.textContent =
+            graph.edges.length;
+
+
+        graphTitle.textContent =
+            title;
+
+
+        graphSection.classList.remove(
+            'hidden'
+        );
+
+
+        d3Graph.render(graph);
+
+
+        status.textContent =
+            `Graf učitan: ${graph.nodes.length} čvorova i ${graph.edges.length} veza.`;
+
+    }
+    catch (error) {
+
+        console.error(error);
+
+        graphSection.classList.add(
+            'hidden'
+        );
+
+        status.textContent =
+            `Greška: ${error.message}`;
+    }
+}
+
+
+/*
+ * IZBOR TIPA GRAFA
+ */
+
+graphTypeSelect.addEventListener(
+    'change',
+    async function () {
+
+        const type =
+            this.value;
+
+
+        graphSection.classList.add(
+            'hidden'
+        );
+
+        classSection.classList.add(
+            'hidden'
+        );
+
+        propertySection.classList.add(
+            'hidden'
+        );
+
+        groupSection.classList.add(
+            'hidden'
+        );
+
+
+        groups.innerHTML = '';
+
+
+        /*
+         * GRAF KLASE
+         */
+
+        if (type === 'classes') {
+
+            await loadGraph(
+                '/api/graph?type=classes',
+                'Graf klasa'
+            );
+
+            return;
+        }
+
+
+        /*
+         * GRAF PROPERTY-JA
+         */
+
+        if (type === 'properties') {
+
+            await loadGraph(
+                '/api/graph?type=properties',
+                'Graf properties'
+            );
+
+            return;
+        }
+
+
+        /*
+         * GRAF GRUPA
+         */
+
+        if (type === 'groups') {
+
+            classSection.classList.remove(
+                'hidden'
+            );
+
+            status.textContent =
+                'Izaberite klasu.';
+        }
+    }
+);
+
+
+/*
+ * IZBOR KLASE
+ */
+
+classSelect.addEventListener(
+    'change',
+    async function () {
+
+        const classUri =
+            this.value;
+
 
         propertySelect.innerHTML = `
             <option value="">
@@ -126,115 +452,276 @@ classSelect.addEventListener('change', async function () {
             </option>
         `;
 
+
         groups.innerHTML = '';
-        groupSection.classList.add('hidden');
+
+        groupSection.classList.add(
+            'hidden'
+        );
+
 
         if (!classUri) {
 
-            propertySection.classList.add('hidden');
+            propertySection.classList.add(
+                'hidden'
+            );
+
             return;
         }
 
 
-        try {
+        const type =
+            graphTypeSelect.value;
 
-            status.textContent = 'Učitavanje relacija...';
 
-            const response = await fetch(`/api/properties?class=${encodeURIComponent(classUri)}`);
-            const properties = await response.json();
+        /*
+         * Ako prikazujemo grupe,
+         * učitavamo properties za izabranu klasu.
+         */
 
-            properties.forEach(property => {
-                const option = document.createElement('option');
-                option.value = property.uri;
-                option.textContent = property.name;
-                option.dataset.comment = property.comment || '';
-                propertySelect.appendChild(option);
-            });
+        if (type === 'groups') {
 
-            propertySection.classList.remove('hidden');
-            status.textContent = `Pronađeno ${properties.length} relacija.`;
-        }
-        catch (error) {
-            console.error(error);
-            status.textContent = 'Greška prilikom učitavanja relacija.';
+            try {
+
+                status.textContent =
+                    'Učitavanje relacija...';
+
+
+                const response =
+                    await fetch(
+                        `/api/properties?class=${encodeURIComponent(classUri)}`
+                    );
+
+
+                const properties =
+                    await response.json();
+
+
+                properties.forEach(property => {
+
+                    const option =
+                        document.createElement('option');
+
+                    option.value =
+                        property.uri;
+
+                    option.textContent =
+                        property.name;
+
+                    option.dataset.comment =
+                        property.comment || '';
+
+
+                    propertySelect.appendChild(
+                        option
+                    );
+                });
+
+
+                propertySection.classList.remove(
+                    'hidden'
+                );
+
+
+                status.textContent =
+                    `Pronađeno ${properties.length} relacija.`;
+
+            }
+            catch (error) {
+
+                console.error(error);
+
+                status.textContent =
+                    'Greška prilikom učitavanja relacija.';
+            }
         }
     }
 );
 
-propertySelect.addEventListener('change', async function () {
 
-        const propertyUri = this.value;
-        const classUri = classSelect.value;
+/*
+ * IZBOR PROPERTY-JA
+ */
+
+propertySelect.addEventListener(
+    'change',
+    async function () {
+
+        const propertyUri =
+            this.value;
+
+        const classUri =
+            classSelect.value;
+
+
         groups.innerHTML = '';
-        groupSection.classList.add('hidden');
+
+        groupSection.classList.add(
+            'hidden'
+        );
+
 
         if (!propertyUri || !classUri) {
+
             return;
         }
 
-        const selectedOption = this.options[this.selectedIndex];
-        propertyDescription.textContent = selectedOption.dataset.comment || '';
+
+        const selectedOption =
+            this.options[this.selectedIndex];
+
+
+        propertyDescription.textContent =
+            selectedOption.dataset.comment || '';
+
 
         try {
-            status.textContent = 'Grupisanje podataka...';
 
-            const response = await fetch(`/api/group?class=${encodeURIComponent(classUri)}&property=${encodeURIComponent(propertyUri)}`);
-            const data = await response.json();
+            status.textContent =
+                'Grupisanje podataka...';
 
-            if (!Array.isArray(data) || data.length === 0) {
 
-                groups.innerHTML = '<p>Nema podataka za izabranu relaciju.</p>';
-                groupSection.classList.remove('hidden');
-                status.textContent = 'Nema podataka za grupisanje.';
+            const response =
+                await fetch(
+                    `/api/group?class=${encodeURIComponent(classUri)}&property=${encodeURIComponent(propertyUri)}`
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (
+                !Array.isArray(data) ||
+                data.length === 0
+            ) {
+
+                groups.innerHTML =
+                    '<p>Nema podataka za izabranu relaciju.</p>';
+
+                groupSection.classList.remove(
+                    'hidden'
+                );
+
+                status.textContent =
+                    'Nema podataka za grupisanje.';
 
                 return;
             }
 
+
             data.forEach(group => {
 
-                const groupElement = document.createElement('div');
-                groupElement.className = 'group';
-                const title = document.createElement('h3');
-                title.textContent = group.name;
-                const type = document.createElement('p');
+                const groupElement =
+                    document.createElement('div');
+
+                groupElement.className =
+                    'group';
+
+
+                /*
+                 * KLIK NA GRUPU
+                 */
+
+                groupElement.addEventListener(
+                    'click',
+                    async function () {
+
+                        await loadGraph(
+                            `/api/graph?type=groups&class=${encodeURIComponent(classUri)}&property=${encodeURIComponent(propertyUri)}&group=${encodeURIComponent(group.uri)}`,
+                            `Graf grupe: ${group.name}`
+                        );
+                    }
+                );
+
+
+                const title =
+                    document.createElement('h3');
+
+                title.textContent =
+                    group.name;
+
+
+                const type =
+                    document.createElement('p');
+
 
                 if (group.type) {
-                    type.textContent = `Tip: ${group.type}`;
+
+                    type.textContent =
+                        `Tip: ${group.type}`;
                 }
 
-                const list = document.createElement('div');
+
+                const list =
+                    document.createElement('div');
+
+
                 group.items.forEach(item => {
 
-                    const element = document.createElement('div');
-                    element.className = 'group-item';
-                    element.textContent = item.name;
-                    list.appendChild(element);
+                    const element =
+                        document.createElement('div');
+
+                    element.className =
+                        'group-item';
+
+                    element.textContent =
+                        item.name;
+
+                    list.appendChild(
+                        element
+                    );
                 });
 
-                groupElement.appendChild(title);
+
+                groupElement.appendChild(
+                    title
+                );
+
 
                 if (group.type) {
-                    groupElement.appendChild(type);
+
+                    groupElement.appendChild(
+                        type
+                    );
                 }
 
-                groupElement.appendChild(list);
-                groups.appendChild(groupElement);
+
+                groupElement.appendChild(
+                    list
+                );
+
+
+                groups.appendChild(
+                    groupElement
+                );
             });
 
-            groupSection.classList.remove('hidden');
-            status.textContent = `Pronađeno ${data.length} grupa.`;
+
+            groupSection.classList.remove(
+                'hidden'
+            );
+
+
+            status.textContent =
+                `Pronađeno ${data.length} grupa. Kliknite na grupu za prikaz njenog grafa.`;
 
         }
         catch (error) {
 
             console.error(error);
-            status.textContent = 'Greška prilikom grupisanja podataka.';
+
+            status.textContent =
+                'Greška prilikom grupisanja podataka.';
         }
     }
 );
 
+
 loadClasses();
 
 </script>
+
 </body>
+
 </html>

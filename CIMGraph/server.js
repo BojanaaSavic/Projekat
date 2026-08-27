@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 import { RdfStore } from './src/rdfStore.js';
 import { SparqlService } from './src/sparqlService.js';
 import { RdfsService } from './src/rdfsService.js';
-
+import { GraphService } from './src/graphService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -62,9 +62,9 @@ async function initialize() {
     const store = rdfStore.getStore();
     const sparql = new SparqlService(store);
     const rdfs = new RdfsService(sparql);
+    const graph = new GraphService(sparql);
 
-
-    return { store, sparql, rdfs };
+    return { store, sparql, rdfs, graph };
 }
 
 const app = await initialize();
@@ -90,6 +90,17 @@ const server = http.createServer(async (request, response) => {
 
                 response.writeHead(200, { 'Content-Type': 'text/css; charset=utf-8'});
                 response.end(css);
+
+                return;
+            }
+
+            if (request.method === 'GET' && request.url === '/d3Graph.js') {
+
+                const jsPath = path.join(__dirname, 'public', 'd3Graph.js');
+                const js = await fs.readFile(jsPath, 'utf8');
+
+                response.writeHead(200, { 'Content-Type': 'application/javascript; charset=utf-8' });
+                response.end(js);
 
                 return;
             }
@@ -195,6 +206,89 @@ const server = http.createServer(async (request, response) => {
 
                 response.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
                 response.end(JSON.stringify(Object.values(groups)));
+
+                return;
+            }
+
+            if (request.method === 'GET' && request.url.startsWith('/api/graph')) {
+
+                const url = new URL(
+                    request.url,
+                    `http://localhost:${PORT}`
+                );
+
+                const type = url.searchParams.get('type');
+
+                let graph;
+
+
+                if (type === 'classes') {
+
+                    graph = await app.graph.getClassGraph();
+                }
+
+
+                else if (type === 'properties') {
+
+                    graph = await app.graph.getPropertyGraph();
+                }
+
+
+                else if (type === 'groups') {
+
+                    const classUri =
+                        url.searchParams.get('class');
+
+                    const propertyUri =
+                        url.searchParams.get('property');
+
+                    const groupUri =
+                        url.searchParams.get('group');
+
+                    if (!classUri || !propertyUri) {
+
+                        response.writeHead(400, {
+                            'Content-Type': 'application/json; charset=utf-8'
+                        });
+
+                        response.end(
+                            JSON.stringify({
+                                error: 'Za graf grupa potrebni su klasa i property.'
+                            })
+                        );
+
+                        return;
+                    }
+
+                    graph = await app.graph.getGroupGraph(
+                        classUri,
+                        propertyUri,
+                        groupUri
+                    );
+                }
+
+
+                else {
+
+                    response.writeHead(400, {
+                        'Content-Type': 'application/json; charset=utf-8'
+                    });
+
+                    response.end(
+                        JSON.stringify({
+                            error: 'Nepoznat tip grafa.'
+                        })
+                    );
+
+                    return;
+                }
+
+
+                response.writeHead(200, {
+                    'Content-Type': 'application/json; charset=utf-8'
+                });
+
+                response.end(JSON.stringify(graph));
 
                 return;
             }
