@@ -212,82 +212,55 @@ const server = http.createServer(async (request, response) => {
 
             if (request.method === 'GET' && request.url.startsWith('/api/graph')) {
 
-                const url = new URL(
-                    request.url,
-                    `http://localhost:${PORT}`
-                );
-
+                const url = new URL(request.url, `http://localhost:${PORT}`);
                 const type = url.searchParams.get('type');
-
                 let graph;
 
+                //GRAF INSTANCI
 
-                if (type === 'classes') {
+                if (type === 'instances') {
 
-                    graph = await app.graph.getClassGraph();
-                }
+                    const classUri = url.searchParams.get('class');
 
+                    if (!classUri) {
 
-                else if (type === 'properties') {
-
-                    graph = await app.graph.getPropertyGraph();
-                }
-
-
-                else if (type === 'groups') {
-
-                    const classUri =
-                        url.searchParams.get('class');
-
-                    const propertyUri =
-                        url.searchParams.get('property');
-
-                    const groupUri =
-                        url.searchParams.get('group');
-
-                    if (!classUri || !propertyUri) {
-
-                        response.writeHead(400, {
-                            'Content-Type': 'application/json; charset=utf-8'
-                        });
-
-                        response.end(
-                            JSON.stringify({
-                                error: 'Za graf grupa potrebni su klasa i property.'
-                            })
-                        );
+                        response.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+                        response.end(JSON.stringify({ error: 'Klasa je obavezna.' }));
 
                         return;
                     }
 
-                    graph = await app.graph.getGroupGraph(
-                        classUri,
-                        propertyUri,
-                        groupUri
-                    );
+                    graph = await app.graph.getInstanceGraph(classUri);
                 }
 
+                //GRAF GRUPA
+
+                else if (type === 'groups') {
+
+                    const classUri = url.searchParams.get('class');
+                    const propertyUri = url.searchParams.get('property');
+                    const groupUri = url.searchParams.get('group');
+
+                    if (!classUri || !propertyUri) {
+
+                        response.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+                        response.end(JSON.stringify({ error: 'Za graf grupa potrebni su klasa i relacija.' }));
+
+                        return;
+                    }
+
+                    graph = await app.graph.getGroupGraph(classUri, propertyUri, groupUri);
+                }
 
                 else {
 
-                    response.writeHead(400, {
-                        'Content-Type': 'application/json; charset=utf-8'
-                    });
-
-                    response.end(
-                        JSON.stringify({
-                            error: 'Nepoznat tip grafa.'
-                        })
-                    );
+                    response.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+                    response.end(JSON.stringify({ error: 'Nepoznat tip grafa.' }));
 
                     return;
                 }
 
-
-                response.writeHead(200, {
-                    'Content-Type': 'application/json; charset=utf-8'
-                });
-
+                response.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
                 response.end(JSON.stringify(graph));
 
                 return;

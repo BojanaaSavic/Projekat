@@ -4,135 +4,52 @@ const CIM = 'http://iec.ch/TC57/CIM100#';
 
 export class GraphService {
 
-    constructor(sparqlService) {
-        this.sparql = sparqlService;
-    }
-
+    constructor(sparqlService) { this.sparql = sparqlService; }
 
     /*
-     * GRAF KLASE
+     * GRAF INSTANCI
      *
-     * Čvorovi = RDFS klase
-     * Veze = rdfs:subClassOf
+     * Čvorovi = instance izabrane klase
+     * Veze = RDF relacije između instanci
+     *
+     * Izabrana klasa određuje koje instance se prikazuju.
      */
-    async getClassGraph() {
+    async getInstanceGraph(classUri) {
 
-        const query = `
-            SELECT DISTINCT
-                ?class
-                ?label
-                ?parent
-                ?parentLabel
+        if (!classUri) {
+
+            return {
+                nodes: [],
+                edges: []
+            };
+        }
+
+
+        const query = `SELECT DISTINCT ?instance ?instanceName ?relation ?target ?targetName ?targetType
             WHERE {
 
-                {
-                    ?class a <${RDFS}Class> .
-                }
-                UNION
-                {
-                    ?class <${RDFS}subClassOf> ?parent .
+                ?instance a <${classUri}> .
+
+                ?instance ?relation ?target .
+
+                FILTER (isIRI(?target))
+
+                OPTIONAL {
+                    ?instance <${CIM}IdentifiedObject.name> ?instanceName .
                 }
 
                 OPTIONAL {
-                    ?class <${RDFS}label> ?label .
+                    ?target <${CIM}IdentifiedObject.name> ?targetName .
                 }
 
                 OPTIONAL {
-                    ?class <${RDFS}subClassOf> ?parent .
+                    ?target a ?targetType .
                 }
 
-                OPTIONAL {
-                    ?parent <${RDFS}label> ?parentLabel .
-                }
+                FILTER (?relation != <${RDF}type>)
             }
         `;
 
-        const results = await this.sparql.query(query);
-
-        const nodes = new Map();
-        const edges = new Map();
-
-        results.forEach(binding => {
-
-            const classUri = binding.get('class')?.value;
-            const classLabel = binding.get('label')?.value;
-
-            const parentUri = binding.get('parent')?.value;
-            const parentLabel = binding.get('parentLabel')?.value;
-
-            if (!classUri) {
-                return;
-            }
-
-            this.addNode(
-                nodes,
-                classUri,
-                classLabel || this.getLocalName(classUri),
-                'Class'
-            );
-
-            if (parentUri) {
-
-                this.addNode(
-                    nodes,
-                    parentUri,
-                    parentLabel || this.getLocalName(parentUri),
-                    'Class'
-                );
-
-                this.addEdge(
-                    edges,
-                    classUri,
-                    parentUri,
-                    `${RDFS}subClassOf`,
-                    'subClassOf'
-                );
-            }
-        });
-
-        return this.createGraph(nodes, edges);
-    }
-
-
-    /*
-     * GRAF PROPERTIJA
-     *
-     * Čvorovi = klase
-     * Veze = RDF properties
-     *
-     * domain klase -> range klase
-     */
-    async getPropertyGraph() {
-
-        const query = `
-            SELECT DISTINCT
-                ?property
-                ?propertyLabel
-                ?domain
-                ?domainLabel
-                ?range
-                ?rangeLabel
-            WHERE {
-
-                ?property <${RDFS}domain> ?domain .
-                ?property <${RDFS}range> ?range .
-
-                OPTIONAL {
-                    ?property <${RDFS}label> ?propertyLabel .
-                }
-
-                OPTIONAL {
-                    ?domain <${RDFS}label> ?domainLabel .
-                }
-
-                OPTIONAL {
-                    ?range <${RDFS}label> ?rangeLabel .
-                }
-
-                FILTER (isIRI(?domain))
-                FILTER (isIRI(?range))
-            }
-        `;
 
         const results = await this.sparql.query(query);
 
@@ -142,69 +59,22 @@ export class GraphService {
 
         results.forEach(binding => {
 
-            const property =
-                binding.get('property')?.value;
-
-            const propertyLabel =
-                binding.get('propertyLabel')?.value;
-
-            const domain =
-                binding.get('domain')?.value;
-
-            const domainLabel =
-                binding.get('domainLabel')?.value;
-
-            const range =
-                binding.get('range')?.value;
-
-            const rangeLabel =
-                binding.get('rangeLabel')?.value;
+            const instance = binding.get('instance')?.value;
+            const instanceName = binding.get('instanceName')?.value;
+            const relation = binding.get('relation')?.value;
+            const target = binding.get('target')?.value;
+            const targetName = binding.get('targetName')?.value;
+            const targetType = binding.get('targetType')?.value;
 
 
-            if (!property || !domain || !range) {
+            if (!instance || !relation || !target) {
                 return;
             }
 
-
-            /*
-            * DOMAIN KLASA
-            */
-
-            this.addNode(
-                nodes,
-                domain,
-                domainLabel || this.getLocalName(domain),
-                'Class'
-            );
-
-
-            /*
-            * RANGE KLASA
-            */
-
-            this.addNode(
-                nodes,
-                range,
-                rangeLabel || this.getLocalName(range),
-                'Class'
-            );
-
-
-            /*
-            * PROPERTY = VEZA
-            *
-            * Svaki property se prikazuje samo jednom.
-            */
-
-            this.addEdge(
-                edges,
-                domain,
-                range,
-                property,
-                propertyLabel || this.getLocalName(property)
-            );
+            this.addNode(nodes, instance, instanceName || this.getLocalName(instance), 'Instance');
+            this.addNode(nodes, target, targetName || this.getLocalName(target), targetType ? this.getLocalName(targetType) : 'Instance');
+            this.addEdge(edges, instance, target, relation, this.getLocalName(relation));
         });
-
 
         return this.createGraph(nodes, edges);
     }
@@ -215,14 +85,9 @@ export class GraphService {
      *
      * classUri + propertyUri određuju grupe.
      *
-     * Čvorovi:
-     *   grupa
-     *   elementi grupe
+     * Čvorovi: grupa i elementi grupe
      *
-     * Veze:
-     *   grupa -> element
-     *
-     * Ako je groupUri naveden, prikazuje se samo ta grupa.
+     * Veze: grupa -> element
      */
     async getGroupGraph(classUri, propertyUri, groupUri = null) {
 
@@ -234,18 +99,8 @@ export class GraphService {
             };
         }
 
-        const groupFilter = groupUri
-            ? `FILTER (?group = <${groupUri}>)`
-            : '';
-
-        const query = `
-            SELECT DISTINCT
-                ?item
-                ?itemName
-                ?itemType
-                ?group
-                ?groupName
-                ?groupType
+        const groupFilter = groupUri ? `FILTER (?group = <${groupUri}>)` : '';
+        const query = `SELECT DISTINCT ?item ?itemName ?itemType ?group ?groupName ?groupType
             WHERE {
 
                 ?item a <${classUri}> .
@@ -273,7 +128,6 @@ export class GraphService {
         `;
 
         const results = await this.sparql.query(query);
-
         const nodes = new Map();
         const edges = new Map();
 
@@ -282,7 +136,6 @@ export class GraphService {
             const item = binding.get('item')?.value;
             const itemName = binding.get('itemName')?.value;
             const itemType = binding.get('itemType')?.value;
-
             const group = binding.get('group')?.value;
             const groupName = binding.get('groupName')?.value;
             const groupType = binding.get('groupType')?.value;
@@ -291,36 +144,13 @@ export class GraphService {
                 return;
             }
 
-            this.addNode(
-                nodes,
-                group,
-                groupName || this.getLocalName(group),
-                groupType
-                    ? this.getLocalName(groupType)
-                    : 'Group'
-            );
-
-            this.addNode(
-                nodes,
-                item,
-                itemName || this.getLocalName(item),
-                itemType
-                    ? this.getLocalName(itemType)
-                    : 'Item'
-            );
-
-            this.addEdge(
-                edges,
-                group,
-                item,
-                propertyUri,
-                this.getLocalName(propertyUri)
-            );
+            this.addNode(nodes, group, groupName || this.getLocalName(group), groupType ? this.getLocalName(groupType) : 'Group');
+            this.addNode(nodes, item, itemName || this.getLocalName(item), itemType ? this.getLocalName(itemType) : 'Item');
+            this.addEdge(edges, group, item, propertyUri, this.getLocalName(propertyUri));
         });
 
         return this.createGraph(nodes, edges);
     }
-
 
     addNode(nodes, id, name, type = null) {
 
@@ -359,7 +189,6 @@ export class GraphService {
         }
     }
 
-
     createGraph(nodes, edges) {
 
         return {
@@ -367,7 +196,6 @@ export class GraphService {
             edges: Array.from(edges.values())
         };
     }
-
 
     getLocalName(uri) {
 
@@ -378,15 +206,16 @@ export class GraphService {
         const hashIndex = uri.lastIndexOf('#');
 
         if (hashIndex !== -1) {
+
             return uri.substring(hashIndex + 1);
         }
 
         const slashIndex = uri.lastIndexOf('/');
 
         if (slashIndex !== -1) {
+
             return uri.substring(slashIndex + 1);
         }
-
         return uri;
     }
 }
