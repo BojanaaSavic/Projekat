@@ -116,6 +116,17 @@ const server = http.createServer(async (request, response) => {
                 return;
             }
 
+            if (request.method === 'GET' && request.url === '/sigmaGraph.js') {
+
+                const jsPath = path.join(__dirname, 'public', 'sigmaGraph.js');
+                const js = await fs.readFile(jsPath, 'utf8');
+
+                response.writeHead(200, { 'Content-Type': 'application/javascript; charset=utf-8' });
+                response.end(js);
+
+                return;
+            }
+
             if (request.method === 'GET' && request.url === '/api/classes') {
 
                 const results = await app.rdfs.getClasses();

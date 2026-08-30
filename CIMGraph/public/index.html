@@ -63,6 +63,10 @@
                 Cytoscape.js
             </option>
 
+            <option value="sigma">
+                Sigma.js
+            </option>
+
         </select>
 
     </section>
@@ -173,6 +177,7 @@
 
 import { D3Graph } from '/d3Graph.js';
 import { CytoscapeGraph } from '/cytoscapeGraph.js';
+import { SigmaGraph } from '/sigmaGraph.js';
 
 const graphTypeSelect = document.getElementById('graphTypeSelect');
 const graphLibrarySelect = document.getElementById('graphLibrarySelect');
@@ -188,13 +193,15 @@ const graphTitle = document.getElementById('graphTitle');
 const graphContainer = document.getElementById('graphContainer');
 const d3Graph = new D3Graph(graphContainer);
 const cytoscapeGraph = new CytoscapeGraph(graphContainer);
+const sigmaGraph = new SigmaGraph(graphContainer);
 const nodeCount = document.getElementById('nodeCount');
 const edgeCount = document.getElementById('edgeCount');
 const status = document.getElementById('status');
 
 const graphRenderers = {
     d3: d3Graph,
-    cytoscape: cytoscapeGraph
+    cytoscape: cytoscapeGraph,
+    sigma: sigmaGraph
 };
 
 // UČITAVANJE KLASA
