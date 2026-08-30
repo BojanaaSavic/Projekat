@@ -12,6 +12,7 @@
         href="/style.css"
     >
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/cytoscape@3.34.2/dist/cytoscape.min.js"></script>
 </head>
 <body>
 <header>
@@ -43,6 +44,23 @@
 
             <option value="groups">
                 Grupe
+            </option>
+
+        </select>
+        <br><br>
+
+        <label for="graphLibrarySelect">
+            Biblioteka za prikaz grafa:
+        </label>
+
+        <select id="graphLibrarySelect">
+
+            <option value="d3">
+                D3.js
+            </option>
+
+            <option value="cytoscape">
+                Cytoscape.js
             </option>
 
         </select>
@@ -135,8 +153,8 @@
         </div>
 
         <div
-            id="d3Graph"
-            class="d3-graph"
+            id="graphContainer"
+            class="graph-container"
         ></div>
 
     </section>
@@ -154,8 +172,10 @@
 <script type="module">
 
 import { D3Graph } from '/d3Graph.js';
+import { CytoscapeGraph } from '/cytoscapeGraph.js';
 
 const graphTypeSelect = document.getElementById('graphTypeSelect');
+const graphLibrarySelect = document.getElementById('graphLibrarySelect');
 const classSelect = document.getElementById('classSelect');
 const propertySelect = document.getElementById('propertySelect');
 const classSection = document.getElementById('classSection');
@@ -165,11 +185,17 @@ const groups = document.getElementById('groups');
 const propertyDescription = document.getElementById('propertyDescription');
 const graphSection = document.getElementById('graphSection');
 const graphTitle = document.getElementById('graphTitle');
-const d3Container = document.getElementById('d3Graph');
+const graphContainer = document.getElementById('graphContainer');
+const d3Graph = new D3Graph(graphContainer);
+const cytoscapeGraph = new CytoscapeGraph(graphContainer);
 const nodeCount = document.getElementById('nodeCount');
 const edgeCount = document.getElementById('edgeCount');
 const status = document.getElementById('status');
-const d3Graph = new D3Graph(d3Container);
+
+const graphRenderers = {
+    d3: d3Graph,
+    cytoscape: cytoscapeGraph
+};
 
 // UČITAVANJE KLASA
 
@@ -201,25 +227,31 @@ async function loadClasses() {
 
 // UČITAVANJE GRAFA
 
+let currentGraph = null;
+
 async function loadGraph(url, title) {
+
     try {
+
         status.textContent = 'Učitavanje grafa...';
+
         const response = await fetch(url);
 
         if (!response.ok) {
-            const error = await response.json();
 
+            const error = await response.json();
             throw new Error(error.error || 'Greška prilikom učitavanja grafa.');
         }
 
         const graph = await response.json();
+        currentGraph = graph;
 
         nodeCount.textContent = graph.nodes.length;
         edgeCount.textContent = graph.edges.length;
-
         graphTitle.textContent = title;
         graphSection.classList.remove('hidden');
-        d3Graph.render(graph);
+
+        renderCurrentGraph();
 
         status.textContent = `Graf učitan: ${graph.nodes.length} čvorova i ${graph.edges.length} veza.`;
     }
@@ -229,6 +261,41 @@ async function loadGraph(url, title) {
         status.textContent = `Greška: ${error.message}`;
     }
 }
+
+function renderCurrentGraph() {
+
+    if (!currentGraph) {
+        return;
+    }
+
+    const library = graphLibrarySelect.value;
+    const renderer = graphRenderers[library];
+
+    if (!renderer) {
+        console.error(`Nepoznata biblioteka za prikaz: ${library}`);
+        return;
+    }
+
+    Object.values(graphRenderers).forEach(
+        currentRenderer => {
+            if (currentRenderer !== renderer) {
+                currentRenderer.clear();
+            }
+
+        }
+    );
+
+    renderer.render(currentGraph);
+}
+
+graphLibrarySelect.addEventListener('change', function () {
+
+        if (!currentGraph) {
+            return;
+        }
+        renderCurrentGraph();
+    }
+);
 
 // IZBOR TIPA GRAFA
 
