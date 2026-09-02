@@ -12,7 +12,7 @@ export class D3Graph {
     }
 
 
-    render(graph) {
+    render(graph, onNodeDoubleClick) {
 
         this.clear();
 
@@ -54,6 +54,11 @@ export class D3Graph {
                 }
 
                 return d.name;
+            });
+        node.on('dblclick', (event, d) => {
+                if (onNodeDoubleClick) {
+                    onNodeDoubleClick(d);
+                }
             });
         node.call(
             d3.drag().on('start', (event, d) => {

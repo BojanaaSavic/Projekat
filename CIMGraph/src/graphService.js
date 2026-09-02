@@ -152,6 +152,62 @@ export class GraphService {
         return this.createGraph(nodes, edges);
     }
 
+    async getEquipmentGraph(containerUri) {
+
+        if (!containerUri) {
+            return {
+                nodes: [],
+                edges: []
+            };
+        }
+
+        const query = `SELECT DISTINCT ?equipment ?equipmentName ?equipmentType ?property
+            WHERE {
+
+                ?equipment a ?equipmentType .
+
+                ?equipmentType <${RDFS}subClassOf>* <${CIM}Equipment> .
+
+                ?equipment ?property <${containerUri}> .
+
+                OPTIONAL { ?equipment <${CIM}IdentifiedObject.name> ?equipmentName . }
+
+                FILTER (?property != <${RDF}type>)
+            }
+        `;
+
+        const results = await this.sparql.query(query);
+
+        const nodes = new Map();
+        const edges = new Map();
+
+        // KONTEJNER
+        this.addNode(nodes, containerUri, this.getLocalName(containerUri), 'Container');
+
+        results.forEach(binding => {
+
+            const equipment = binding.get('equipment')?.value;
+            const equipmentName = binding.get('equipmentName')?.value;
+            const equipmentType = binding.get('equipmentType')?.value;
+            const property = binding.get('property')?.value;
+
+            if (!equipment || !property) {
+                return;
+            }
+
+            this.addNode(
+                nodes,
+                equipment,
+                equipmentName || this.getLocalName(equipment),
+                equipmentType ? this.getLocalName(equipmentType) : 'Equipment'
+            );
+
+            this.addEdge(edges, containerUri, equipment, property, this.getLocalName(property));
+        });
+
+        return this.createGraph(nodes, edges);
+    }
+
     addNode(nodes, id, name, type = null) {
 
         if (!id) {

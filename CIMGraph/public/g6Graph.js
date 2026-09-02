@@ -4,7 +4,7 @@ export class G6Graph {
         this.graph = null;
     }
 
-    render(graph) {
+    render(graph, onNodeDoubleClick) {
 
         this.clear();
 
@@ -80,6 +80,25 @@ export class G6Graph {
             ]
         });
 
+        // DVOKLIK NA ČVOR
+
+        this.graph.on('node:dblclick', event => {
+
+            const node = event.item;
+
+            if (!node || !onNodeDoubleClick) {
+                return;
+            }
+
+            const nodeData = node.getData();
+
+            onNodeDoubleClick({
+                id: nodeData.id,
+                name: nodeData.data.name,
+                type: nodeData.data.type
+            });
+        });
+        
         this.graph.render();
     }
 

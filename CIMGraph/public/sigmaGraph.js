@@ -12,7 +12,7 @@ export class SigmaGraph {
         this.isDragging = false;
     }
 
-    render(graph) {
+    render(graph, onNodeDoubleClick) {
 
         this.clear();
         this.graph = new Graph();
@@ -112,6 +112,23 @@ export class SigmaGraph {
             this.renderer.getCamera().enable();
             }
         );
+
+        // DVOKLIK NA ČVOR
+
+        this.renderer.on('doubleClickNode', ({ node }) => {
+
+            const name = this.graph.getNodeAttribute(node, 'label');
+            const type = this.graph.getNodeAttribute(node, 'cimType');
+
+            if (onNodeDoubleClick) {
+
+                onNodeDoubleClick({
+                    id: node,
+                    name: name,
+                    type: type
+                });
+            }
+        });
 
         this.renderer.on('enterNode', ({ node }) => {
                 const name = this.graph.getNodeAttribute(node, 'label');

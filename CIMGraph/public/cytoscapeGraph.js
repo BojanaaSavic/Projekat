@@ -4,7 +4,7 @@ export class CytoscapeGraph {
         this.cy = null;
     }
 
-    render(graph) {
+    render(graph, onNodeDoubleClick) {
 
         this.clear();
         const elements = [];
@@ -36,6 +36,7 @@ export class CytoscapeGraph {
         });
 
         this.cy = cytoscape({
+            
             container: this.container,
             elements: elements,
             style: [
@@ -92,6 +93,21 @@ export class CytoscapeGraph {
                 const type = node.data('type');
 
                 node.data('tooltip', type ? `${name}\nTip: ${type}` : name);
+            });
+        });
+
+        // DVOKLIK NA ČVOR
+
+        this.cy.nodes().forEach(node => {
+
+            node.on('dblclick', () => {
+                if (onNodeDoubleClick) {
+                    onNodeDoubleClick({
+                        id: node.id(),
+                        name: node.data('name'),
+                        type: node.data('type')
+                    });
+                }
             });
         });
     }

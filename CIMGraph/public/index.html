@@ -276,6 +276,18 @@ async function loadGraph(url, title) {
     }
 }
 
+async function handleNodeDoubleClick(node) {
+
+    if (!node || !node.id) {
+        return;
+    }
+
+    await loadGraph(
+        `/api/graph?type=equipment&container=${encodeURIComponent(node.id)}`,
+        `Oprema kontejnera: ${node.name || node.id}`
+    );
+}
+
 function renderCurrentGraph() {
 
     if (!currentGraph) {
@@ -299,7 +311,7 @@ function renderCurrentGraph() {
         }
     );
 
-    renderer.render(currentGraph);
+    renderer.render(currentGraph, handleNodeDoubleClick);
 }
 
 graphLibrarySelect.addEventListener('change', function () {

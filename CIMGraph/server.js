@@ -266,6 +266,21 @@ const server = http.createServer(async (request, response) => {
                     graph = await app.graph.getInstanceGraph(classUri);
                 }
 
+                else if (type === 'equipment') {
+                    
+                    const containerUri = url.searchParams.get('container');
+
+                    if (!containerUri) {
+
+                        response.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+                        response.end(JSON.stringify({ error: 'Kontejner je obavezan.' }));
+
+                        return;
+                    }
+
+                    graph = await app.graph.getEquipmentGraph(containerUri);
+                }
+
                 //GRAF GRUPA
 
                 else if (type === 'groups') {
