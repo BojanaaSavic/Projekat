@@ -1,3 +1,13 @@
+function escapeXml(value) {
+
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+}
+
 export class CytoscapeGraph {
     constructor(container) {
         this.container = container;
@@ -110,6 +120,113 @@ export class CytoscapeGraph {
                 }
             });
         });
+    }
+
+    async exportPNG() {
+
+        if (!this.cy) {
+            throw new Error('Cytoscape graf nije iscrtan.');
+        }
+
+        return await this.cy.png({
+            output: 'blob',
+            bg: '#ffffff',
+            full: true,
+            scale: 2
+        });
+    }
+
+    async exportSVG() {
+
+        if (!this.cy) {
+            throw new Error('Cytoscape graf nije iscrtan.');
+        }
+
+        const nodes = this.cy.nodes();
+        const edges = this.cy.edges();
+
+        const padding = 50;
+
+        const box = nodes.boundingBox();
+
+        const width = box.w + padding * 2;
+        const height = box.h + padding * 2;
+
+        const offsetX = padding - box.x1;
+        const offsetY = padding - box.y1;
+
+        let svg = `
+    <svg xmlns="http://www.w3.org/2000/svg"
+        width="${width}"
+        height="${height}"
+        viewBox="0 0 ${width} ${height}">
+
+        <rect
+            width="100%"
+            height="100%"
+            fill="white"
+        />
+    `;
+
+        // VEZE
+
+        edges.forEach(edge => {
+
+            const source = edge.source().position();
+            const target = edge.target().position();
+
+            const x1 = source.x + offsetX;
+            const y1 = source.y + offsetY;
+
+            const x2 = target.x + offsetX;
+            const y2 = target.y + offsetY;
+
+            svg += `
+        <line
+            x1="${x1}"
+            y1="${y1}"
+            x2="${x2}"
+            y2="${y2}"
+            stroke="#999"
+            stroke-width="1.5"
+        />
+    `;
+        });
+
+        // ČVOROVI
+
+        nodes.forEach(node => {
+
+            const position = node.position();
+
+            const x = position.x + offsetX;
+            const y = position.y + offsetY;
+
+            const name = escapeXml(node.data('name') || node.id());
+
+            svg += `
+        <circle
+            cx="${x}"
+            cy="${y}"
+            r="9"
+            fill="#4f81bd"
+        />
+
+        <text
+            x="${x + 13}"
+            y="${y + 4}"
+            font-family="Arial"
+            font-size="12"
+            fill="#222"
+        >${name}</text>
+    `;
+        });
+
+        svg += `
+    </svg>
+    `;
+
+        return svg;
     }
 
     clear() {

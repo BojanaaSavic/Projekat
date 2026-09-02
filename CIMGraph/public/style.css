@@ -291,3 +291,50 @@ select {
     background: white;
     position: relative;
 }
+
+.graph-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.graph-header h2 {
+    margin: 0;
+}
+
+.export-controls {
+    position: relative;
+}
+
+.export-dropdown {
+    position: relative;
+}
+
+.export-button {
+    padding: 8px 14px;
+    cursor: pointer;
+}
+
+.export-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    min-width: 100%;
+    background: white;
+    border: 1px solid #ccc;
+    z-index: 1000;
+}
+
+.export-menu button {
+    display: block;
+    width: 100%;
+    padding: 8px 14px;
+    border: none;
+    background: white;
+    text-align: left;
+    cursor: pointer;
+}
+
+.export-menu button:hover {
+    background: #f0f0f0;
+}

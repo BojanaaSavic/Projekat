@@ -142,9 +142,37 @@
         class="card hidden"
     >
 
-        <h2 id="graphTitle">
-            Graf povezanosti
-        </h2>
+        <div class="graph-header">
+
+            <h2 id="graphTitle">
+                Graf povezanosti
+            </h2>
+
+            <div id="exportControls" class="export-controls hidden">
+
+                <div class="export-dropdown">
+
+                    <button id="exportButton" class="export-button">
+                        Export grafa ▾
+                    </button>
+
+                    <div id="exportMenu" class="export-menu hidden">
+
+                        <button id="exportSvgButton">
+                            SVG
+                        </button>
+
+                        <button id="exportPngButton">
+                            PNG
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
 
         <div class="graph-info">
 
@@ -203,6 +231,11 @@ const g6Graph = new G6Graph(graphContainer);
 const nodeCount = document.getElementById('nodeCount');
 const edgeCount = document.getElementById('edgeCount');
 const status = document.getElementById('status');
+const exportControls = document.getElementById('exportControls');
+const exportButton = document.getElementById('exportButton');
+const exportMenu = document.getElementById('exportMenu');
+const exportSvgButton = document.getElementById('exportSvgButton');
+const exportPngButton = document.getElementById('exportPngButton');
 
 const graphRenderers = {
     d3: d3Graph,
@@ -210,6 +243,72 @@ const graphRenderers = {
     sigma: sigmaGraph,
     g6: g6Graph
 };
+
+// EXPORT GRAFA
+
+function downloadFile(blob, filename) {
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = filename;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+}
+
+
+async function exportGraph(format) {
+
+    if (!currentGraph) {
+        return;
+    }
+
+    const library = graphLibrarySelect.value;
+    const renderer = graphRenderers[library];
+
+    if (!renderer) {
+        return;
+    }
+
+    try {
+
+        status.textContent = `Exportovanje grafa u ${format.toUpperCase()}...`;
+
+        if (format === 'svg') {
+
+            const svg = await renderer.exportSVG();
+
+            const blob = new Blob(
+                [svg],
+                { type: 'image/svg+xml;charset=utf-8' }
+            );
+
+            downloadFile(blob, 'cim-graf.svg');
+        }
+
+        if (format === 'png') {
+
+            const blob = await renderer.exportPNG();
+
+            downloadFile(blob, 'cim-graf.png');
+        }
+
+        status.textContent = 'Graf uspješno eksportovan.';
+
+    }
+    catch (error) {
+
+        console.error(error);
+
+        status.textContent =
+            `Greška prilikom exportovanja grafa: ${error.message}`;
+    }
+}
 
 // UČITAVANJE KLASA
 
@@ -244,6 +343,7 @@ async function loadClasses() {
 let currentGraph = null;
 
 async function loadGraph(url, title) {
+    exportMenu.classList.add('hidden');
 
     try {
 
@@ -266,6 +366,7 @@ async function loadGraph(url, title) {
         graphSection.classList.remove('hidden');
 
         renderCurrentGraph();
+        exportControls.classList.remove('hidden');
 
         status.textContent = `Graf učitan: ${graph.nodes.length} čvorova i ${graph.edges.length} veza.`;
     }
@@ -314,6 +415,30 @@ function renderCurrentGraph() {
     renderer.render(currentGraph, handleNodeDoubleClick);
 }
 
+exportButton.addEventListener('click', () => {
+
+    exportMenu.classList.toggle('hidden');
+
+});
+
+
+exportSvgButton.addEventListener('click', async () => {
+
+    exportMenu.classList.add('hidden');
+
+    await exportGraph('svg');
+
+});
+
+
+exportPngButton.addEventListener('click', async () => {
+
+    exportMenu.classList.add('hidden');
+
+    await exportGraph('png');
+
+});
+
 graphLibrarySelect.addEventListener('change', function () {
 
         if (!currentGraph) {
@@ -329,6 +454,7 @@ graphTypeSelect.addEventListener('change', async function () {
         const type = this.value;
 
         graphSection.classList.add('hidden');
+        exportControls.classList.add('hidden');
         classSection.classList.add('hidden');
         propertySection.classList.add('hidden');
         groupSection.classList.add('hidden');

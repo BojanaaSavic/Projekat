@@ -1,3 +1,13 @@
+function escapeXml(value) {
+
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+}
+
 export class G6Graph {
     constructor(container) {
         this.container = container;
@@ -98,8 +108,139 @@ export class G6Graph {
                 type: nodeData.data.type
             });
         });
-        
+
         this.graph.render();
+    }
+
+    async exportPNG() {
+
+        if (!this.graph) {
+            throw new Error('G6 graf nije iscrtan.');
+        }
+
+        const dataURL = await this.graph.toDataURL({
+            mode: 'overall',
+            type: 'image/png'
+        });
+
+        const response = await fetch(dataURL);
+
+        return await response.blob();
+    }
+
+    async exportSVG() {
+
+        if (!this.graph) {
+            throw new Error('G6 graf nije iscrtan.');
+        }
+
+        const nodes = this.graph.getNodeData();
+        const edges = this.graph.getEdgeData();
+
+        const padding = 50;
+
+        const positions = {};
+
+        nodes.forEach(node => {
+
+            const [x, y] =
+                this.graph.getElementPosition(node.id);
+
+            positions[node.id] = { x, y };
+        });
+
+        const values = Object.values(positions);
+
+        const minX = Math.min(...values.map(p => p.x));
+        const maxX = Math.max(...values.map(p => p.x));
+
+        const minY = Math.min(...values.map(p => p.y));
+        const maxY = Math.max(...values.map(p => p.y));
+
+        const width = maxX - minX + padding * 2;
+        const height = maxY - minY + padding * 2;
+
+        const offsetX = padding - minX;
+        const offsetY = padding - minY;
+
+        let svg = `
+    <svg xmlns="http://www.w3.org/2000/svg"
+        width="${width}"
+        height="${height}"
+        viewBox="0 0 ${width} ${height}">
+
+        <rect
+            width="100%"
+            height="100%"
+            fill="white"
+        />
+    `;
+
+        // VEZE
+
+        edges.forEach(edge => {
+
+            const source = positions[edge.source];
+            const target = positions[edge.target];
+
+            if (!source || !target) {
+                return;
+            }
+
+            svg += `
+        <line
+            x1="${source.x + offsetX}"
+            y1="${source.y + offsetY}"
+            x2="${target.x + offsetX}"
+            y2="${target.y + offsetY}"
+            stroke="#999"
+            stroke-width="1.5"
+        />
+    `;
+        });
+
+        // ČVOROVI
+
+        nodes.forEach(node => {
+
+            const position = positions[node.id];
+
+            if (!position) {
+                return;
+            }
+
+            const x = position.x + offsetX;
+            const y = position.y + offsetY;
+
+            const name = escapeXml(
+                node.data?.name || node.id
+            );
+
+            svg += `
+        <circle
+            cx="${x}"
+            cy="${y}"
+            r="9"
+            fill="#4f81bd"
+            stroke="#2f5597"
+            stroke-width="1"
+        />
+
+        <text
+            x="${x + 13}"
+            y="${y + 4}"
+            font-family="Arial"
+            font-size="12"
+            fill="#222"
+        >${name}</text>
+    `;
+        });
+
+        svg += `
+    </svg>
+    `;
+
+        return svg;
     }
 
     clear() {

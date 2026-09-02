@@ -41,7 +41,11 @@ export class D3Graph {
         const nodesLayer = zoomLayer.append('g').attr('class', 'nodes');
         const link = linksLayer.selectAll('g').data(graph.edges).enter().append('g').attr('class', 'graph-edge');
 
-        link.append('line').attr('class', 'graph-link');
+        link.append('line')
+            .attr('class', 'graph-link')
+            .attr('stroke', '#999')
+            .attr('stroke-opacity', 0.6)
+            .attr('stroke-width', 1.5);
         link.append('text').attr('class', 'edge-label').text(d => d.propertyName || '');
 
         const node = nodesLayer.selectAll('g').data(graph.nodes).enter().append('g').attr('class', 'graph-node');
@@ -100,6 +104,84 @@ export class D3Graph {
 
             node.attr('transform', d => `translate(${d.x},${d.y})`);
         });
+    }
+
+    async exportSVG() {
+
+        if (!this.svg) {
+            throw new Error('D3 graf nije iscrtan.');
+        }
+
+        const svgElement = this.svg.node();
+
+        const clone = svgElement.cloneNode(true);
+
+        clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+
+        return new XMLSerializer().serializeToString(clone);
+    }
+
+
+    async exportPNG() {
+
+        const svg = await this.exportSVG();
+
+        const blob = new Blob(
+            [svg],
+            { type: 'image/svg+xml;charset=utf-8' }
+        );
+
+        const url = URL.createObjectURL(blob);
+
+        try {
+
+            const image = new Image();
+
+            image.src = url;
+
+            await new Promise((resolve, reject) => {
+
+                image.onload = resolve;
+                image.onerror = reject;
+
+            });
+
+            const canvas = document.createElement('canvas');
+
+            canvas.width = this.width;
+            canvas.height = this.height;
+
+            const context = canvas.getContext('2d');
+
+            context.fillStyle = '#ffffff';
+            context.fillRect(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+            context.drawImage(
+                image,
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+            return await new Promise(resolve => {
+
+                canvas.toBlob(resolve, 'image/png');
+
+            });
+
+        }
+        finally {
+
+            URL.revokeObjectURL(url);
+
+        }
     }
 
     clear() {

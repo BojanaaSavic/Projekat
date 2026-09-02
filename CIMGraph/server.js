@@ -83,6 +83,35 @@ const server = http.createServer(async (request, response) => {
                 return;
             }
 
+            if (request.method === 'GET' && request.url === '/benchmark.html') {
+
+                const htmlPath = path.join(__dirname, 'public', 'benchmark.html');
+                const html = await fs.readFile(htmlPath, 'utf8');
+
+                response.writeHead(200, {
+                    'Content-Type': 'text/html; charset=utf-8'
+                });
+
+                response.end(html);
+
+                return;
+            }
+
+
+            if (request.method === 'GET' && request.url === '/benchmark.js') {
+
+                const jsPath = path.join(__dirname, 'public', 'benchmark.js');
+                const js = await fs.readFile(jsPath, 'utf8');
+
+                response.writeHead(200, {
+                    'Content-Type': 'application/javascript; charset=utf-8'
+                });
+
+                response.end(js);
+
+                return;
+            }
+
             if (request.method === 'GET' && request.url === '/style.css') {
 
                 const cssPath = path.join( __dirname, 'public', 'style.css');
@@ -267,7 +296,7 @@ const server = http.createServer(async (request, response) => {
                 }
 
                 else if (type === 'equipment') {
-                    
+
                     const containerUri = url.searchParams.get('container');
 
                     if (!containerUri) {
