@@ -44,7 +44,7 @@ async function initialize() {
 
 
     const rdfStore = new RdfStore();
-    await rdfStore.loadTurtle('./data/FullGrid_EQ.ttl');
+    await rdfStore.loadTurtle('./data/RealGrid_EQ.ttl');
 
     console.log();
     console.log(`RDF model učitan.`);

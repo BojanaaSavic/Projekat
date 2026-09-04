@@ -76,7 +76,7 @@ export class GraphService {
             this.addEdge(edges, instance, target, relation, this.getLocalName(relation));
         });
 
-        return this.createGraph(nodes, edges);
+        return this.createGraph(nodes, edges, query);
     }
 
 
@@ -149,7 +149,7 @@ export class GraphService {
             this.addEdge(edges, group, item, propertyUri, this.getLocalName(propertyUri));
         });
 
-        return this.createGraph(nodes, edges);
+        return this.createGraph(nodes, edges, query);
     }
 
     async getEquipmentGraph(containerUri) {
@@ -205,7 +205,7 @@ export class GraphService {
             this.addEdge(edges, containerUri, equipment, property, this.getLocalName(property));
         });
 
-        return this.createGraph(nodes, edges);
+        return this.createGraph(nodes, edges, query);
     }
 
     addNode(nodes, id, name, type = null) {
@@ -245,11 +245,12 @@ export class GraphService {
         }
     }
 
-    createGraph(nodes, edges) {
+    createGraph(nodes, edges, query = '') {
 
         return {
             nodes: Array.from(nodes.values()),
-            edges: Array.from(edges.values())
+            edges: Array.from(edges.values()),
+            query
         };
     }
 

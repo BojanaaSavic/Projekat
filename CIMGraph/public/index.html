@@ -23,6 +23,19 @@
     </p>
 </header>
 <main>
+    <!-- SPARQL UPIT -->
+
+    <section
+        id="querySection"
+        class="card hidden"
+    >
+
+        <h2>SPARQL upit</h2>
+
+        <pre id="sparqlQuery"></pre>
+
+    </section>
+
     <!-- IZBOR TIPA PRIKAZA -->
 
     <section class="card">
@@ -236,6 +249,8 @@ const exportButton = document.getElementById('exportButton');
 const exportMenu = document.getElementById('exportMenu');
 const exportSvgButton = document.getElementById('exportSvgButton');
 const exportPngButton = document.getElementById('exportPngButton');
+const querySection = document.getElementById('querySection');
+const sparqlQuery = document.getElementById('sparqlQuery');
 
 const graphRenderers = {
     d3: d3Graph,
@@ -360,6 +375,9 @@ async function loadGraph(url, title) {
         const graph = await response.json();
         currentGraph = graph;
 
+        sparqlQuery.textContent = graph.query || '';
+        querySection.classList.remove('hidden');
+
         nodeCount.textContent = graph.nodes.length;
         edgeCount.textContent = graph.edges.length;
         graphTitle.textContent = title;
@@ -458,6 +476,7 @@ graphTypeSelect.addEventListener('change', async function () {
         classSection.classList.add('hidden');
         propertySection.classList.add('hidden');
         groupSection.classList.add('hidden');
+        querySection.classList.add('hidden');
         groups.innerHTML = '';
 
         // INSTANCE PO KLASI

@@ -338,3 +338,15 @@ select {
 .export-menu button:hover {
     background: #f0f0f0;
 }
+
+.sparqlQuery {
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 15px;
+    white-space: pre-wrap;
+    overflow-x: auto;
+    font-family: monospace;
+    font-size: 14px;
+    line-height: 1.5;
+}

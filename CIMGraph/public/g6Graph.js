@@ -80,7 +80,8 @@ export class G6Graph {
                 kr: 20,
                 kg: 1,
                 maxIteration: 500,
-                mode: 'linlog'
+                mode: 'linlog',
+                barnesHut: true
             },
             behaviors: [
 
