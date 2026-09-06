@@ -3,64 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CIM/RDF Graph Benchmark</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 24px; }
-        h1 { margin-bottom: 8px; }
-        .controls { display: flex; gap: 12px; flex-wrap: wrap; margin: 18px 0; }
-        button { padding: 8px 14px; cursor: pointer; }
-        #status { margin: 12px 0; font-weight: bold; }
-        #benchmark-container {
-            width: 100%;
-            height: 650px;
-            border: 1px solid #ccc;
-            overflow: hidden;
-        }
-        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-        th, td { border: 1px solid #ccc; padding: 7px; text-align: right; }
-        th:first-child, td:first-child,
-        th:nth-child(3), td:nth-child(3) { text-align: left; }
-        .note { color: #555; max-width: 1000px; line-height: 1.5; }
-    </style>
+<title>Benchmark biblioteka</title>
+
+<link rel="stylesheet" href="/style.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/cytoscape@3.34.2/dist/cytoscape.min.js"></script>
+    <script src="https://unpkg.com/@antv/g6@5/dist/g6.min.js"></script>
 </head>
 <body>
+<div class="benchmark-page">
 
-<h1>Benchmark biblioteka za vizuelizaciju grafova</h1>
+    <h1>Benchmark biblioteka za vizuelizaciju grafa</h1>
+    <p class="benchmark-description">
+        Benchmark se izvršava nad stvarnim CIM/RDF podacima. Sve biblioteke dobijaju isti graf i iste podatke.
+    </p>
 
-<p class="note">
-    Benchmark koristi isti generisani graf za sve četiri biblioteke.
-    Svaki test se izvršava jednom kao zagrijavanje, a zatim još pet puta.
-    Mjere se vrijeme layout-a, renderovanja i ukupno vrijeme.
-</p>
 
-<div class="controls">
-    <button id="runBenchmark">Pokreni benchmark</button>
-    <button id="downloadCsv" disabled>Preuzmi CSV</button>
+    <!-- POSTAVKE BENCHMARKA -->
+
+    <section class="benchmark-controls">
+        <div class="benchmark-control">
+
+            <label for="classSelect">
+                CIM klasa
+            </label>
+
+            <select id="classSelect">
+                <option value="">
+                    Učitavanje klasa...
+                </option>
+            </select>
+
+        </div>
+
+        <div class="benchmark-control">
+            <label for="resultCount">
+                Broj RDF instanci
+            </label>
+
+            <input
+                type="number"
+                id="resultCount"
+                min="1"
+                value="100"
+            >
+        </div>
+
+        <div class="benchmark-control">
+            <label for="repeatCount">
+                Broj ponavljanja
+            </label>
+
+            <input
+                type="number"
+                id="repeatCount"
+                min="1"
+                value="3"
+            >
+        </div>
+
+        <div class="benchmark-buttons"> 
+            <button id="startBenchmark" class="benchmark-button"> 
+                Pokreni benchmark 
+            </button> 
+            <button id="autoBenchmark" class="benchmark-button"> 
+                Automatski benchmark 
+            </button> 
+            <button id="downloadCSV" class="benchmark-button" disabled> 
+                Preuzmi CSV 
+            </button> 
+        </div>
+
+    </section>
+
+    <section class="benchmark-status">
+        <div id="benchmarkStatus">
+            Spremno za pokretanje.
+        </div>
+    </section>
+
+    <section class="benchmark-info">
+        <div>
+            <strong>Stvarni graf:</strong>
+            <span id="graphSource">RealGrid_EQ.ttl</span>
+        </div>
+
+        <div>
+            <strong>Čvorovi:</strong>
+            <span id="nodeCount">-</span>
+        </div>
+
+        <div>
+            <strong>Veze:</strong>
+            <span id="edgeCount">-</span>
+        </div>
+    </section>
+
+    <section class="benchmark-results">
+
+        <h2>Rezultati</h2>
+
+        <table id="benchmarkTable">
+
+            <thead>
+
+                <tr>
+                    <th>Biblioteka</th>
+                    <th>Čvorovi</th>
+                    <th>Veze</th>
+                    <th>Render (s)</th>
+                    <th>Layout (s)</th>
+                    <th>Ukupno (s)</th>
+                </tr>
+            </thead>
+            <tbody id="benchmarkResults">
+            </tbody>
+        </table>
+    </section>
+
+    <section class="benchmark-render-area">
+        <div
+            id="d3BenchmarkContainer"
+            class="benchmark-container">
+        </div>
+
+        <div
+            id="cytoscapeBenchmarkContainer"
+            class="benchmark-container">
+        </div>
+
+        <div
+            id="sigmaBenchmarkContainer"
+            class="benchmark-container">
+        </div>
+
+        <div
+            id="g6BenchmarkContainer"
+            class="benchmark-container">
+        </div>
+    </section>
 </div>
 
-<div id="status">Spremno.</div>
-<div id="benchmark-container"></div>
-
-<table id="resultsTable">
-    <thead>
-        <tr>
-            <th>Čvorovi</th>
-            <th>Veze</th>
-            <th>Biblioteka</th>
-            <th>Layout (ms)</th>
-            <th>Render (ms)</th>
-            <th>Total (ms)</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
-
-<script src="https://d3js.org/d3.v7.min.js"></script>
-<script src="https://unpkg.com/cytoscape@3.33.1/dist/cytoscape.min.js"></script>
-<script src="https://gw.alipayobjects.com/os/lib/antv/g6/5.0.49/dist/g6.min.js"></script>
-
-<script type="module" src="./benchmark.js"></script>
-
+<script type="module" src="/benchmark.js"></script>
 
 </body>
 </html>

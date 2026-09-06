@@ -14,6 +14,13 @@ export class G6Graph {
         this.graph = null;
     }
 
+    getNodeId(value) {
+        if (typeof value === 'object' && value !== null) {
+            return value.id;
+        }
+        return value;
+    }
+
     render(graph, onNodeDoubleClick) {
 
         this.clear();
@@ -34,8 +41,8 @@ export class G6Graph {
             edges: graph.edges.map(edge => ({
 
                 id: edge.id,
-                source: edge.source,
-                target: edge.target
+                source: this.getNodeId(edge.source),
+                target: this.getNodeId(edge.target)
             }))
         };
 
@@ -137,15 +144,11 @@ export class G6Graph {
 
         const nodes = this.graph.getNodeData();
         const edges = this.graph.getEdgeData();
-
         const padding = 50;
-
         const positions = {};
 
         nodes.forEach(node => {
-
-            const [x, y] =
-                this.graph.getElementPosition(node.id);
+            const [x, y] = this.graph.getElementPosition(node.id);
 
             positions[node.id] = { x, y };
         });
@@ -154,28 +157,26 @@ export class G6Graph {
 
         const minX = Math.min(...values.map(p => p.x));
         const maxX = Math.max(...values.map(p => p.x));
-
         const minY = Math.min(...values.map(p => p.y));
         const maxY = Math.max(...values.map(p => p.y));
 
         const width = maxX - minX + padding * 2;
         const height = maxY - minY + padding * 2;
-
         const offsetX = padding - minX;
         const offsetY = padding - minY;
 
         let svg = `
-    <svg xmlns="http://www.w3.org/2000/svg"
-        width="${width}"
-        height="${height}"
-        viewBox="0 0 ${width} ${height}">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                width="${width}"
+                height="${height}"
+                viewBox="0 0 ${width} ${height}">
 
-        <rect
-            width="100%"
-            height="100%"
-            fill="white"
-        />
-    `;
+            <rect
+                width="100%"
+                height="100%"
+                fill="white"
+            />
+        `;
 
         // VEZE
 
@@ -189,15 +190,15 @@ export class G6Graph {
             }
 
             svg += `
-        <line
-            x1="${source.x + offsetX}"
-            y1="${source.y + offsetY}"
-            x2="${target.x + offsetX}"
-            y2="${target.y + offsetY}"
-            stroke="#999"
-            stroke-width="1.5"
-        />
-    `;
+                <line
+                    x1="${source.x + offsetX}"
+                    y1="${source.y + offsetY}"
+                    x2="${target.x + offsetX}"
+                    y2="${target.y + offsetY}"
+                    stroke="#999"
+                    stroke-width="1.5"
+                />
+            `;
         });
 
         // ČVOROVI
@@ -212,36 +213,118 @@ export class G6Graph {
 
             const x = position.x + offsetX;
             const y = position.y + offsetY;
-
-            const name = escapeXml(
-                node.data?.name || node.id
-            );
+            const name = escapeXml(node.data?.name || node.id);
 
             svg += `
-        <circle
-            cx="${x}"
-            cy="${y}"
-            r="9"
-            fill="#4f81bd"
-            stroke="#2f5597"
-            stroke-width="1"
-        />
+                <circle
+                    cx="${x}"
+                    cy="${y}"
+                    r="9"
+                    fill="#4f81bd"
+                    stroke="#2f5597"
+                    stroke-width="1"
+                />
 
-        <text
-            x="${x + 13}"
-            y="${y + 4}"
-            font-family="Arial"
-            font-size="12"
-            fill="#222"
-        >${name}</text>
-    `;
+                <text
+                    x="${x + 13}"
+                    y="${y + 4}"
+                    font-family="Arial"
+                    font-size="12"
+                    fill="#222"
+                >${name}</text>
+            `;
         });
 
-        svg += `
-    </svg>
-    `;
+        svg += `</svg>`;
 
         return svg;
+    }
+
+    async renderForBenchmark(graph) {
+
+        this.clear();
+
+        const width = this.container.clientWidth || 1000;
+        const height = 650;
+        const data = {
+            nodes: graph.nodes.map(node => ({
+                    id: node.id,
+                    data: {
+                        name: node.name,
+                        type: node.type || ''
+                    }
+                })),
+
+            edges:
+                graph.edges.map(edge => ({
+                    id: edge.id,
+                    source: this.getNodeId(edge.source),
+                    target: this.getNodeId(edge.target)
+                }))
+        };
+
+        const totalStart = performance.now();
+        const renderStart = performance.now();
+
+        this.graph = new G6.Graph({
+                container: this.container,
+                width,
+                height,
+                autoFit: 'view',
+                data,
+                node: {
+                    type: 'circle',
+                    style: {
+                        size: 18,
+                        fill: '#4f81bd',
+                        stroke: '#2f5597',
+                        lineWidth: 1,
+                        labelText: node => node.data.name,
+                        labelFill: '#222',
+                        labelFontSize: 12,
+                        labelPlacement: 'right',
+                        labelOffsetX: 8
+                    }
+                },
+                edge: {
+                    type: 'line',
+                    style: {
+                        stroke: '#999',
+                        lineWidth: 1.5,
+                        endArrow: true
+                    }
+                },
+                layout: {
+                    type: 'force-atlas2',
+                    preventOverlap: true,
+                    nodeSize: 18,
+                    nodeSpacing: 30,
+                    kr: 20,
+                    kg: 1,
+                    maxIteration: 500,
+                    mode: 'linlog',
+                    barnesHut: true
+                }
+            });
+
+        const renderEnd = performance.now();
+        const layoutStart = performance.now();
+
+        this.graph.render();
+
+        await new Promise(resolve => {
+            requestAnimationFrame(() => {
+                requestAnimationFrame(resolve);
+            });
+        });
+
+        const layoutEnd = performance.now();
+
+        return {
+            layoutTime: layoutEnd - layoutStart,
+            renderTime: renderEnd - renderStart,
+            totalTime: layoutEnd - totalStart
+        };
     }
 
     clear() {

@@ -14,7 +14,7 @@ export class GraphService {
      *
      * Izabrana klasa određuje koje instance se prikazuju.
      */
-    async getInstanceGraph(classUri) {
+    async getInstanceGraph(classUri, limit = null) {
 
         if (!classUri) {
 
@@ -48,6 +48,7 @@ export class GraphService {
 
                 FILTER (?relation != <${RDF}type>)
             }
+            ${limit ? `LIMIT ${limit}` : ''}
         `;
 
 

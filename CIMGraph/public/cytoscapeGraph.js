@@ -34,11 +34,15 @@ export class CytoscapeGraph {
         // VEZE
 
         graph.edges.forEach(edge => {
+
+            const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
+            const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
+
             elements.push({
                 data: {
                     id: edge.id,
-                    source: edge.source,
-                    target: edge.target,
+                    source: sourceId,
+                    target: targetId,
                     property: edge.property,
                     propertyName: edge.propertyName || ''
                 }
@@ -144,29 +148,25 @@ export class CytoscapeGraph {
 
         const nodes = this.cy.nodes();
         const edges = this.cy.edges();
-
         const padding = 50;
-
         const box = nodes.boundingBox();
-
         const width = box.w + padding * 2;
         const height = box.h + padding * 2;
-
         const offsetX = padding - box.x1;
         const offsetY = padding - box.y1;
 
         let svg = `
-    <svg xmlns="http://www.w3.org/2000/svg"
-        width="${width}"
-        height="${height}"
-        viewBox="0 0 ${width} ${height}">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                width="${width}"
+                height="${height}"
+                viewBox="0 0 ${width} ${height}">
 
-        <rect
-            width="100%"
-            height="100%"
-            fill="white"
-        />
-    `;
+            <rect
+                width="100%"
+                height="100%"
+                fill="white"
+            />
+        `;
 
         // VEZE
 
@@ -182,15 +182,15 @@ export class CytoscapeGraph {
             const y2 = target.y + offsetY;
 
             svg += `
-        <line
-            x1="${x1}"
-            y1="${y1}"
-            x2="${x2}"
-            y2="${y2}"
-            stroke="#999"
-            stroke-width="1.5"
-        />
-    `;
+                <line
+                    x1="${x1}"
+                    y1="${y1}"
+                    x2="${x2}"
+                    y2="${y2}"
+                    stroke="#999"
+                    stroke-width="1.5"
+                />
+            `;
         });
 
         // ČVOROVI
@@ -205,28 +205,115 @@ export class CytoscapeGraph {
             const name = escapeXml(node.data('name') || node.id());
 
             svg += `
-        <circle
-            cx="${x}"
-            cy="${y}"
-            r="9"
-            fill="#4f81bd"
-        />
+                <circle
+                    cx="${x}"
+                    cy="${y}"
+                    r="9"
+                    fill="#4f81bd"
+                />
 
-        <text
-            x="${x + 13}"
-            y="${y + 4}"
-            font-family="Arial"
-            font-size="12"
-            fill="#222"
-        >${name}</text>
-    `;
+                <text
+                    x="${x + 13}"
+                    y="${y + 4}"
+                    font-family="Arial"
+                    font-size="12"
+                    fill="#222"
+                >${name}</text>
+            `;
         });
 
-        svg += `
-    </svg>
-    `;
+        svg += `</svg>`;
 
         return svg;
+    }
+
+    async renderForBenchmark(graph) {
+
+        this.clear();
+
+        const elements = [];
+
+        graph.nodes.forEach(node => {
+
+            elements.push({
+                data: {
+                    id: node.id,
+                    name: node.name,
+                    type: node.type || ''
+                }
+            });
+        });
+
+        graph.edges.forEach(edge => {
+
+            const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
+            const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
+
+            elements.push({
+                data: {
+                    id: edge.id,
+                    source: sourceId,
+                    target: targetId,
+                    property: edge.property,
+                    propertyName: edge.propertyName || ''
+                }
+            });
+        });
+
+        const totalStart = performance.now();
+        const renderStart = performance.now();
+
+        this.cy = cytoscape({
+
+            container: this.container,
+            elements: elements,
+            style: [
+                {
+                    selector: 'node',
+                    style: {
+                        'background-color': '#4f81bd',
+                        'label': 'data(name)',
+                        'color': '#222',
+                        'font-size': '12px',
+                        'width': 18,
+                        'height': 18
+                    }
+                },
+                {
+                    selector: 'edge',
+                    style: {
+                        'width': 1.5,
+                        'line-color': '#999'
+                    }
+                }
+            ],
+
+            minZoom: 0.1,
+            maxZoom: 5
+        });
+
+        const renderEnd = performance.now();
+        const layoutStart = performance.now();
+
+        await new Promise(resolve => {
+
+            const layout = this.cy.layout({
+                    name: 'cose',
+                    animate: false,
+                    fit: true,
+                    padding: 40
+                });
+            layout.one('layoutstop', resolve);
+            layout.run();
+        });
+
+        const layoutEnd = performance.now();
+
+        return {
+            layoutTime: layoutEnd - layoutStart,
+            renderTime: renderEnd - renderStart,
+            totalTime: layoutEnd - totalStart
+        };
     }
 
     clear() {

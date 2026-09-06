@@ -1,1182 +1,382 @@
-const TESTS = [
-    { nodes: 1000, edges: 2000 },
-    { nodes: 5000, edges: 10000 },
-    { nodes: 10000, edges: 20000 },
-    { nodes: 25000, edges: 50000 },
-    { nodes: 50000, edges: 100000 }
+import { D3Graph } from './d3Graph.js';
+import { CytoscapeGraph } from './cytoscapeGraph.js';
+import { SigmaGraph } from './sigmaGraph.js';
+import { G6Graph } from './g6Graph.js';
+
+const classSelect = document.getElementById('classSelect');
+const resultCountInput = document.getElementById('resultCount');
+const repeatCountInput = document.getElementById('repeatCount');
+const startButton = document.getElementById('startBenchmark');
+const statusElement = document.getElementById('benchmarkStatus');
+const nodeCountElement = document.getElementById('nodeCount');
+const edgeCountElement = document.getElementById('edgeCount');
+const resultsElement = document.getElementById('benchmarkResults');
+
+const renderers = [
+    {
+        name: 'D3.js',
+        containerId: 'd3BenchmarkContainer',
+        create: container => new D3Graph(container)
+    },
+    {
+        name: 'Cytoscape.js',
+        containerId: 'cytoscapeBenchmarkContainer',
+        create: container => new CytoscapeGraph(container)
+    },
+    {
+        name: 'Sigma.js',
+        containerId: 'sigmaBenchmarkContainer',
+        create: container => new SigmaGraph(container)
+    },
+    {
+        name: 'G6',
+        containerId: 'g6BenchmarkContainer',
+        create: container => new G6Graph(container)
+    }
 ];
 
-const REPEATS = 5;
+let classes = [];
+let benchmarkResults = []; 
+let currentGraph = null;
 
-const container = document.getElementById('benchmark-container');
-const status = document.getElementById('status');
-const tableBody = document.querySelector('#resultsTable tbody');
-const runButton = document.getElementById('runBenchmark');
-const csvButton = document.getElementById('downloadCsv');
+async function loadClasses() {
+    try {
 
-let benchmarkResults = [];
+        const response = await fetch('/api/classes');
 
+        if (!response.ok) {
+            throw new Error('Greška prilikom učitavanja klasa.');
+        }
 
-/*
- * GENERISANJE TESTNOG GRAFA
- */
+        classes = await response.json();
+        classSelect.innerHTML = '';
 
-function generateGraph(nodeCount, edgeCount) {
+        classes.forEach(item => {
 
-    const nodes = Array.from(
-        { length: nodeCount },
-        (_, i) => ({
-            id: `n${i}`,
-            name: `Node ${i}`,
-            type: 'BenchmarkNode'
-        })
-    );
+            const option = document.createElement('option');
 
-    const edges = [];
-    const used = new Set();
+            option.value = item.uri;
+            option.textContent = item.name;
 
-
-    // Osigurava da graf bude povezan
-
-    for (
-        let i = 0;
-        i < nodeCount - 1 && edges.length < edgeCount;
-        i++
-    ) {
-
-        const source = `n${i}`;
-        const target = `n${i + 1}`;
-
-        const id = `${source}|p|${target}`;
-
-        used.add(id);
-
-        edges.push({
-            id,
-            source,
-            target,
-            property: 'p',
-            propertyName: 'relation'
+            classSelect.appendChild(option);
         });
+
+    }
+    catch (error) {
+        console.error(error);
+        classSelect.innerHTML = '<option value="">Greška</option>';
+        statusElement.textContent =  error.message;
+    }
+}
+
+async function loadGraph(classUri, limit = null) {
+
+    let url = `/api/graph?type=instances&class=${encodeURIComponent(classUri)}`;
+
+    if (limit !== null) {
+        url += `&limit=${limit}`;
     }
 
+    const response = await fetch(url);
 
-    // Dodavanje preostalih veza
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.error || 'Greška prilikom učitavanja grafa.');
+    }
 
-    let i = 0;
+    return await response.json();
+}
 
-    while (edges.length < edgeCount) {
+function clearRenderer(renderer) {
 
-        const sourceIndex =
-            (i * 37 + 11) % nodeCount;
+    try {
+        renderer.clear();
+    }
+    catch (error) { console.warn('Greška prilikom čišćenja:', error); }
+}
 
-        const targetIndex =
-            (
-                sourceIndex +
-                1 +
-                (
-                    (i * 9973) %
-                    Math.max(1, nodeCount - 1)
-                )
-            ) % nodeCount;
+async function measureRenderer(rendererDefinition, graph) {
+
+    const container = document.getElementById(rendererDefinition.containerId);
+    container.innerHTML = '';
+
+    const renderer = rendererDefinition.create(container);
+    const result = await renderer.renderForBenchmark(graph);
+
+    clearRenderer(renderer);
+
+    return result;
+
+}
+
+async function benchmarkLibrary(rendererDefinition, graph, repetitions) {
+
+    const measurements = [];
+
+    for (let i = 0; i < repetitions; i++) {
+
+        statusElement.textContent = `${rendererDefinition.name}: ` + `ponavljanje ${i + 1}/${repetitions}`;
+
+        await new Promise(resolve => setTimeout(resolve, 50));
+
+        const measurement = await measureRenderer(rendererDefinition, graph);
+        measurements.push(measurement);
+    }
+
+    const averageRender = measurements.reduce((sum, measurement) => sum + measurement.renderTime, 0) / measurements.length;
+    const averageLayout = measurements.reduce((sum, measurement) => sum + measurement.layoutTime, 0) / measurements.length;
+    const averageTotal = measurements.reduce((sum, measurement) => sum + measurement.totalTime, 0) / measurements.length;
+    const minimumTotal = Math.min(...measurements.map(measurement => measurement.totalTime));
+    const maximumTotal = Math.max(...measurements.map(measurement => measurement.totalTime));
+
+    return {
+        name: rendererDefinition.name,
+        measurements,
+        averageRender,
+        averageLayout,
+        averageTotal,
+        minimumTotal,
+        maximumTotal
+    };
+}
+
+function addResultRow(result, graph) {
+
+    const row = document.createElement('tr');
+
+    row.innerHTML = `
+        <td>${result.name}</td>
+        <td>${graph.nodes.length}</td>
+        <td>${graph.edges.length}</td>
+
+        <td>${(result.averageRender / 1000).toFixed(3)}</td>
+        <td>${(result.averageLayout / 1000).toFixed(3)}</td>
+        <td>${(result.averageTotal / 1000).toFixed(3)}</td>
+    `;
+
+    resultsElement.appendChild(row);
+}
 
 
-        if (sourceIndex !== targetIndex) {
+function addBenchmarkResult(result) {
 
-            const source = `n${sourceIndex}`;
-            const target = `n${targetIndex}`;
+    benchmarkResults.push({
+        timestamp: new Date().toISOString(),
+        library: result.library,
+        className: result.className,
+        nodeCount: result.nodeCount,
+        edgeCount: result.edgeCount,
+        repetitions: result.repetitions,
+        averageRenderMs: result.averageRender,
+        averageLayoutMs: result.averageLayout,
+        averageTotalMs: result.averageTotal,
+        minTotalMs: result.minimumTotal,
+        maxTotalMs: result.maximumTotal
+    });
 
-            const id = `${source}|p|${target}`;
+    document.getElementById('downloadCSV').disabled = false;
+}
 
+function exportCSV() {
 
-            if (!used.has(id)) {
+    if (benchmarkResults.length === 0) {
+        alert('Nema rezultata za čuvanje.');
+        return;
+    }
 
-                used.add(id);
+    const headers = [
+        'Timestamp',
+        'Library',
+        'CIM Class',
+        'Nodes',
+        'Edges',
+        'Repetitions',
+        'Average Render (s)',
+        'Average Layout (s)',
+        'Average Total (s)',
+        'Min Total (s)',
+        'Max Total (s)'
+    ];
 
-                edges.push({
-                    id,
-                    source,
-                    target,
-                    property: 'p',
-                    propertyName: 'relation'
+    const rows = benchmarkResults.map(result => [
+
+        result.timestamp,
+        result.library,
+        result.className,
+        result.nodeCount,
+        result.edgeCount,
+        result.repetitions,
+        (result.averageRenderMs / 1000).toFixed(3),
+        (result.averageLayoutMs / 1000).toFixed(3),
+        (result.averageTotalMs / 1000).toFixed(3),
+        (result.minTotalMs / 1000).toFixed(3),
+        (result.maxTotalMs / 1000).toFixed(3)
+
+    ]);
+
+    const csv = [headers, ...rows].map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob(
+        ['\ufeff' + csv],
+        {
+            type: 'text/csv;charset=utf-8;'
+        }
+    );
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = `graph-benchmark-${new Date().toISOString().replace(/[:.]/g, '-')}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+async function runBenchmark() {
+
+    const classUri = classSelect.value;
+    const requestedNodes = Number(resultCountInput.value);
+    const repetitions = Number(repeatCountInput.value);
+
+    if (!classUri) {
+        alert('Izaberi CIM klasu.');
+
+        return;
+    }
+
+    if (!Number.isInteger(requestedNodes) || requestedNodes < 1) {
+        alert('Broj RDF rezultata mora biti pozitivan cijeli broj.');
+
+        return;
+    }
+
+    if (!Number.isInteger(repetitions) || repetitions < 1) {
+        alert('Broj ponavljanja mora biti pozitivan cijeli broj.');
+
+        return;
+    }
+
+    startButton.disabled = true;
+    resultsElement.innerHTML = '';
+
+    nodeCountElement.textContent = '-';
+    edgeCountElement.textContent = '-';
+
+    try {
+        statusElement.textContent = 'Učitavanje stvarnog RealGrid grafa...';
+
+        currentGraph = await loadGraph(classUri, requestedNodes);
+
+        nodeCountElement.textContent = currentGraph.nodes.length;
+        edgeCountElement.textContent = currentGraph.edges.length;
+
+        if (currentGraph.nodes.length < requestedNodes) {
+
+            statusElement.textContent = `RealGrid graf sadrži samo ` + `${currentGraph.nodes.length} ` +
+                `čvorova za izabranu klasu. Benchmark će koristiti taj broj.`;
+        }
+
+        for (const renderer of renderers) {
+
+            const result = await benchmarkLibrary(renderer, currentGraph, repetitions);
+
+            addResultRow(result, currentGraph);
+        }
+
+        statusElement.textContent = 'Benchmark je završen.';
+    }
+    catch (error) {
+
+        console.error(error);
+        statusElement.textContent = `Greška: ${error.message}`;
+    }
+    finally {
+        startButton.disabled = false;
+    }
+}
+
+async function runAutomaticBenchmark() {
+
+    const classUri = classSelect.value;
+    const repetitions = Number(repeatCountInput.value);
+    const automaticSizes = [
+        100,
+        500,
+        1000
+    ];
+
+    if (!classUri) {
+        alert('Izaberi CIM klasu.');
+
+        return;
+    }
+
+    if (!Number.isInteger(repetitions) || repetitions < 1) {
+        alert('Broj ponavljanja mora biti pozitivan cijeli broj.');
+        return;
+    }
+
+    startButton.disabled = true;
+    document.getElementById('autoBenchmark').disabled = true;
+    resultsElement.innerHTML = '';
+    benchmarkResults = [];
+
+    nodeCountElement.textContent = '-';
+    edgeCountElement.textContent = '-';
+
+    try {
+
+        for (const size of automaticSizes) {
+
+            statusElement.textContent = `Učitavanje ${size} RDF rezultata...`;
+
+            currentGraph = await loadGraph(classUri, size);
+
+            if (!currentGraph.nodes || currentGraph.nodes.length === 0) {
+
+                statusElement.textContent = `Nema RDF rezultata za ${size}. Automatski benchmark je završen.`;
+                break;
+            }
+
+            nodeCountElement.textContent = currentGraph.nodes.length;
+            edgeCountElement.textContent = currentGraph.edges.length;
+            statusElement.textContent = `Benchmark za ${currentGraph.nodes.length} RDF rezultata...`;
+
+            for (const renderer of renderers) {
+
+                const result = await benchmarkLibrary(renderer, currentGraph, repetitions);
+
+                addResultRow(result, currentGraph);
+                addBenchmarkResult({
+                    library: result.name,
+                    className: classSelect.selectedOptions[0].textContent,
+                    nodeCount: currentGraph.nodes.length,
+                    edgeCount: currentGraph.edges.length,
+                    repetitions,
+                    averageRender: result.averageRender,
+                    averageLayout: result.averageLayout,
+                    averageTotal: result.averageTotal,
+                    minimumTotal: result.minimumTotal,
+                    maximumTotal: result.maximumTotal
                 });
             }
         }
 
-        i++;
-    }
+        statusElement.textContent = 'Automatski benchmark je završen.';
 
-
-    return {
-        nodes,
-        edges
-    };
-}
-
-
-/*
- * D3.JS
- */
-
-async function benchmarkD3(graph) {
-
-    clearContainer();
-
-    const width =
-        container.clientWidth || 1000;
-
-    const height = 650;
-
-
-    const svg = d3
-        .select(container)
-        .append('svg')
-        .attr('width', width)
-        .attr('height', height);
-
-
-    const links = svg
-        .append('g')
-        .selectAll('line')
-        .data(graph.edges)
-        .enter()
-        .append('line');
-
-
-    const nodes = svg
-        .append('g')
-        .selectAll('circle')
-        .data(graph.nodes)
-        .enter()
-        .append('circle')
-        .attr('r', 4);
-
-
-    const start = performance.now();
-
-
-    const simulation = d3
-        .forceSimulation(graph.nodes)
-
-        .force(
-            'link',
-            d3.forceLink(graph.edges)
-                .id(d => d.id)
-                .distance(50)
-        )
-
-        .force(
-            'charge',
-            d3.forceManyBody()
-                .strength(-30)
-        )
-
-        .force(
-            'center',
-            d3.forceCenter(
-                width / 2,
-                height / 2
-            )
-        )
-
-        .force(
-            'collision',
-            d3.forceCollide()
-                .radius(5)
-        )
-
-        .stop();
-
-
-    /*
-     * LAYOUT
-     */
-
-    const layoutStart =
-        performance.now();
-
-
-    for (let i = 0; i < 100; i++) {
-
-        simulation.tick();
-    }
-
-
-    const layoutEnd =
-        performance.now();
-
-
-    /*
-     * RENDER
-     */
-
-    links
-        .attr('x1', d => d.source.x)
-        .attr('y1', d => d.source.y)
-        .attr('x2', d => d.target.x)
-        .attr('y2', d => d.target.y);
-
-
-    nodes
-        .attr('cx', d => d.x)
-        .attr('cy', d => d.y);
-
-
-    const renderEnd =
-        performance.now();
-
-
-    simulation.stop();
-
-
-    return {
-
-        layout:
-            layoutEnd - layoutStart,
-
-        render:
-            renderEnd - layoutEnd,
-
-        total:
-            renderEnd - start
-    };
-}
-
-
-/*
- * CYTOSCAPE.JS
- */
-
-async function benchmarkCytoscape(graph) {
-
-    clearContainer();
-
-
-    const elements = [
-
-        ...graph.nodes.map(node => ({
-
-            data: {
-
-                id: node.id,
-
-                name: node.name,
-
-                type: node.type
-            }
-        })),
-
-
-        ...graph.edges.map(edge => ({
-
-            data: {
-
-                id: edge.id,
-
-                source: edge.source,
-
-                target: edge.target
-            }
-        }))
-    ];
-
-
-    const start =
-        performance.now();
-
-
-    const cy = cytoscape({
-
-        container,
-
-        elements,
-
-
-        style: [
-
-            {
-                selector: 'node',
-
-                style: {
-
-                    'background-color':
-                        '#4f81bd',
-
-                    'width': 8,
-
-                    'height': 8
-                }
-            },
-
-
-            {
-                selector: 'edge',
-
-                style: {
-
-                    'width': 1,
-
-                    'line-color': '#999'
-                }
-            }
-        ],
-
-
-        layout: {
-
-            name: 'cose',
-
-            animate: false,
-
-            fit: false,
-
-            padding: 20
-        }
-    });
-
-
-    const createEnd =
-        performance.now();
-
-
-    /*
-     * LAYOUT
-     */
-
-    const layout =
-        cy.layout({
-
-            name: 'cose',
-
-            animate: false,
-
-            fit: false,
-
-            padding: 20
-        });
-
-
-    const layoutStart =
-        performance.now();
-
-
-    layout.run();
-
-
-    const layoutEnd =
-        performance.now();
-
-
-    /*
-     * RENDER
-     */
-
-    cy.resize();
-
-
-    const renderEnd =
-        performance.now();
-
-
-    cy.destroy();
-
-
-    return {
-
-        layout:
-            layoutEnd - layoutStart,
-
-        render:
-            renderEnd - layoutEnd,
-
-        total:
-            renderEnd - start
-    };
-}
-
-
-/*
- * SIGMA.JS
- *
- * Graphology + ForceAtlas2
- */
-
-async function benchmarkSigma(graph) {
-
-    clearContainer();
-
-
-    const sigmaGraph =
-        new Graph();
-
-
-    const start =
-        performance.now();
-
-
-    /*
-     * DODAVANJE ČVOROVA
-     */
-
-    graph.nodes.forEach(node => {
-
-        sigmaGraph.addNode(
-
-            node.id,
-
-            {
-
-                label: node.name,
-
-                size: 5,
-
-                color: '#4f81bd',
-
-                type: 'circle'
-            }
-        );
-    });
-
-
-    /*
-     * DODAVANJE VEZA
-     */
-
-    graph.edges.forEach(edge => {
-
-        if (
-            !sigmaGraph.hasNode(edge.source) ||
-            !sigmaGraph.hasNode(edge.target)
-        ) {
-
-            return;
-        }
-
-
-        if (
-            sigmaGraph.hasEdge(
-                edge.source,
-                edge.target
-            )
-        ) {
-
-            return;
-        }
-
-
-        sigmaGraph.addEdge(
-
-            edge.source,
-
-            edge.target,
-
-            {
-
-                size: 1,
-
-                color: '#999'
-            }
-        );
-    });
-
-
-    const createEnd =
-        performance.now();
-
-
-    /*
-     * POČETNE KOORDINATE
-     */
-
-    sigmaGraph.forEachNode(node => {
-
-        sigmaGraph.setNodeAttribute(
-            node,
-            'x',
-            Math.random()
-        );
-
-        sigmaGraph.setNodeAttribute(
-            node,
-            'y',
-            Math.random()
-        );
-    });
-
-
-    /*
-     * LAYOUT
-     */
-
-    const layoutStart =
-        performance.now();
-
-
-    forceAtlas2.assign(
-
-        sigmaGraph,
-
-        {
-
-            iterations: 100,
-
-            settings: {
-
-                gravity: 1,
-
-                scalingRatio: 10,
-
-                strongGravityMode: true,
-
-                slowDown: 1,
-
-                barnesHutOptimize: true
-            }
-        }
-    );
-
-
-    const layoutEnd =
-        performance.now();
-
-
-    /*
-     * RENDER
-     */
-
-    const renderer = new Sigma(
-
-        sigmaGraph,
-
-        container,
-
-        {
-
-            settings: {
-
-                autoRescale: 'once',
-
-                renderLabels: false
-            }
-        }
-    );
-
-
-    renderer.refresh();
-
-
-    const renderEnd =
-        performance.now();
-
-
-    renderer.kill();
-
-
-    return {
-
-        layout:
-            layoutEnd - layoutStart,
-
-        render:
-            renderEnd - layoutEnd,
-
-        total:
-            renderEnd - start
-    };
-}
-
-
-/*
- * G6
- *
- * ForceAtlas2
- */
-
-async function benchmarkG6(graph) {
-
-    clearContainer();
-
-
-    const width =
-        container.clientWidth || 1000;
-
-    const height = 650;
-
-
-    const data = {
-
-        nodes: graph.nodes.map(node => ({
-
-            id: node.id,
-
-            data: {
-
-                name: node.name,
-
-                type: node.type
-            }
-        })),
-
-
-        edges: graph.edges.map(edge => ({
-
-            id: edge.id,
-
-            source: edge.source,
-
-            target: edge.target
-        }))
-    };
-
-
-    const start =
-        performance.now();
-
-
-    const g =
-        new G6.Graph({
-
-            container,
-
-            width,
-
-            height,
-
-            autoFit: 'view',
-
-            data,
-
-
-            node: {
-
-                type: 'circle',
-
-                style: {
-
-                    size: 8
-                }
-            },
-
-
-            edge: {
-
-                type: 'line',
-
-                style: {
-
-                    lineWidth: 1
-                }
-            },
-
-
-            layout: {
-
-                type: 'force-atlas2',
-
-                preventOverlap: true,
-
-                nodeSize: 8,
-
-                nodeSpacing: 10,
-
-                kr: 20,
-
-                kg: 1,
-
-                maxIteration: 500,
-
-                mode: 'linlog'
-            }
-        });
-
-
-    const createEnd =
-        performance.now();
-
-
-    /*
-     * RENDER + LAYOUT
-     */
-
-    g.render();
-
-
-    await new Promise(
-        resolve =>
-            requestAnimationFrame(resolve)
-    );
-
-
-    const renderEnd =
-        performance.now();
-
-
-    g.destroy();
-
-
-    return {
-
-        /*
-         * Kod G6 biblioteke layout i render
-         * nisu potpuno odvojeni u ovoj implementaciji.
-         */
-
-        layout:
-            renderEnd - createEnd,
-
-        render: 0,
-
-        total:
-            renderEnd - start
-    };
-}
-
-
-/*
- * POMOĆNE FUNKCIJE
- */
-
-function clearContainer() {
-
-    container.innerHTML = '';
-}
-
-
-function average(values) {
-
-    return values.reduce(
-        (sum, value) =>
-            sum + value,
-        0
-    ) / values.length;
-}
-
-
-/*
- * POKRETANJE JEDNE BIBLIOTEKE
- */
-
-async function runLibrary(
-    name,
-    graph,
-    benchmarkFunction
-) {
-
-
-    /*
-     * WARM-UP
-     */
-
-    try {
-
-        await benchmarkFunction(graph);
-
+        exportCSV();
     }
     catch (error) {
-
-        console.error(
-            `Warm-up greška (${name}):`,
-            error
-        );
+        console.error(error);
+        statusElement.textContent = `Greška: ${error.message}`;
     }
-
-
-    const measurements = [];
-
-
-    /*
-     * PONAVLJANJA
-     */
-
-    for (
-        let i = 0;
-        i < REPEATS;
-        i++
-    ) {
-
-
-        status.textContent =
-
-            `${name}: ` +
-
-            `${graph.nodes.length.toLocaleString()} ` +
-
-            `čvorova, ` +
-
-            `ponavljanje ` +
-
-            `${i + 1}/${REPEATS}`;
-
-
-        await new Promise(
-            resolve =>
-                requestAnimationFrame(resolve)
-        );
-
-
-        try {
-
-            const result =
-                await benchmarkFunction(graph);
-
-
-            measurements.push(result);
-
-        }
-        catch (error) {
-
-            console.error(
-                `Greška (${name}):`,
-                error
-            );
-
-
-            measurements.push({
-
-                layout: NaN,
-
-                render: NaN,
-
-                total: NaN
-            });
-        }
-
-
-        await new Promise(
-            resolve =>
-                requestAnimationFrame(resolve)
-        );
+    finally {
+        startButton.disabled = false;
+        document.getElementById('autoBenchmark').disabled = false;
     }
-
-
-    return {
-
-        nodes:
-            graph.nodes.length,
-
-        edges:
-            graph.edges.length,
-
-        library:
-            name,
-
-
-        layout:
-            average(
-                measurements.map(
-                    result =>
-                        result.layout
-                )
-            ),
-
-
-        render:
-            average(
-                measurements.map(
-                    result =>
-                        result.render
-                )
-            ),
-
-
-        total:
-            average(
-                measurements.map(
-                    result =>
-                        result.total
-                )
-            )
-    };
 }
 
-
-/*
- * DODAVANJE REZULTATA U TABELU
- */
-
-function addResultToTable(result) {
-
-    const row =
-        document.createElement('tr');
-
-
-    const values = [
-
-        result.nodes,
-
-        result.edges,
-
-        result.library,
-
-        result.layout.toFixed(3),
-
-        result.render.toFixed(3),
-
-        result.total.toFixed(3)
-    ];
-
-
-    values.forEach(value => {
-
-        const cell =
-            document.createElement('td');
-
-        cell.textContent = value;
-
-        row.appendChild(cell);
-    });
-
-
-    tableBody.appendChild(row);
-}
-
-
-/*
- * FORMIRANJE CSV-a
- */
-
-function resultsToCsv(results) {
-
-    const header = [
-
-        'nodes',
-
-        'edges',
-
-        'library',
-
-        'layout_ms',
-
-        'render_ms',
-
-        'total_ms'
-    ];
-
-
-    const rows =
-        results.map(result => [
-
-            result.nodes,
-
-            result.edges,
-
-            result.library,
-
-            result.layout.toFixed(3),
-
-            result.render.toFixed(3),
-
-            result.total.toFixed(3)
-        ]);
-
-
-    return [
-
-        header.join(','),
-
-        ...rows.map(
-            row => row.join(',')
-        )
-
-    ].join('\n');
-}
-
-
-/*
- * GLAVNI BENCHMARK
- */
-
-runButton.addEventListener(
-    'click',
-    async () => {
-
-
-        runButton.disabled = true;
-
-        csvButton.disabled = true;
-
-
-        tableBody.innerHTML = '';
-
-        benchmarkResults = [];
-
-
-        try {
-
-
-            /*
-             * Svaki test koristi isti graf
-             * za sve četiri biblioteke.
-             */
-
-            for (const test of TESTS) {
-
-
-                status.textContent =
-
-                    `Generisanje grafa: ` +
-
-                    `${test.nodes.toLocaleString()} ` +
-
-                    `čvorova / ` +
-
-                    `${test.edges.toLocaleString()} ` +
-
-                    `veza...`;
-
-
-                const graph =
-                    generateGraph(
-
-                        test.nodes,
-
-                        test.edges
-                    );
-
-
-                const libraries = [
-
-                    [
-                        'D3.js',
-
-                        benchmarkD3
-                    ],
-
-
-                    [
-                        'Cytoscape.js',
-
-                        benchmarkCytoscape
-                    ],
-
-
-                    [
-                        'Sigma.js',
-
-                        benchmarkSigma
-                    ],
-
-
-                    [
-                        'G6',
-
-                        benchmarkG6
-                    ]
-                ];
-
-
-                for (
-                    const [
-                        name,
-                        benchmarkFunction
-                    ]
-                    of libraries
-                ) {
-
-
-                    const result =
-                        await runLibrary(
-
-                            name,
-
-                            graph,
-
-                            benchmarkFunction
-                        );
-
-
-                    benchmarkResults.push(
-                        result
-                    );
-
-
-                    addResultToTable(
-                        result
-                    );
-                }
-            }
-
-
-            status.textContent =
-                'Benchmark završen.';
-
-
-            csvButton.disabled = false;
-
-        }
-
-
-        catch (error) {
-
-            console.error(error);
-
-
-            status.textContent =
-
-                `Benchmark nije uspješno završen: ` +
-
-                error.message;
-        }
-
-
-        finally {
-
-            runButton.disabled = false;
-
-            clearContainer();
-        }
-    }
-);
-
-
-/*
- * PREUZIMANJE CSV REZULTATA
- */
-
-csvButton.addEventListener(
-    'click',
-    () => {
-
-
-        const csv =
-            resultsToCsv(
-                benchmarkResults
-            );
-
-
-        const blob =
-            new Blob(
-
-                ["\ufeff" + csv],
-
-                {
-
-                    type:
-                        'text/csv;charset=utf-8;'
-                }
-            );
-
-
-        const url =
-            URL.createObjectURL(
-                blob
-            );
-
-
-        const link =
-            document.createElement('a');
-
-
-        link.href = url;
-
-
-        link.download =
-            'cim_graph_benchmark.csv';
-
-
-        link.click();
-
-
-        URL.revokeObjectURL(url);
-    }
-);
+    startButton.addEventListener('click', runBenchmark);
+    document.getElementById('downloadCSV').addEventListener('click', exportCSV);
+    document.getElementById('autoBenchmark').addEventListener('click', runAutomaticBenchmark);
+
+    loadClasses();

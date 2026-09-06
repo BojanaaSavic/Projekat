@@ -1,3 +1,11 @@
+const d3 = window.d3;
+
+if (!d3) {
+    throw new Error(
+        'D3.js nije učitan. Provjeri benchmark.html.'
+    );
+}
+
 export class D3Graph {
 
     constructor(container) {
@@ -113,7 +121,6 @@ export class D3Graph {
         }
 
         const svgElement = this.svg.node();
-
         const clone = svgElement.cloneNode(true);
 
         clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
@@ -126,25 +133,18 @@ export class D3Graph {
     async exportPNG() {
 
         const svg = await this.exportSVG();
-
-        const blob = new Blob(
-            [svg],
-            { type: 'image/svg+xml;charset=utf-8' }
-        );
-
+        const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' } );
         const url = URL.createObjectURL(blob);
 
         try {
 
             const image = new Image();
-
             image.src = url;
 
             await new Promise((resolve, reject) => {
 
                 image.onload = resolve;
                 image.onerror = reject;
-
             });
 
             const canvas = document.createElement('canvas');
@@ -155,33 +155,72 @@ export class D3Graph {
             const context = canvas.getContext('2d');
 
             context.fillStyle = '#ffffff';
-            context.fillRect(
-                0,
-                0,
-                canvas.width,
-                canvas.height
-            );
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
 
-            context.drawImage(
-                image,
-                0,
-                0,
-                canvas.width,
-                canvas.height
-            );
-
-            return await new Promise(resolve => {
-
-                canvas.toBlob(resolve, 'image/png');
-
-            });
+            return await new Promise(resolve => { canvas.toBlob(resolve, 'image/png'); });
 
         }
         finally {
-
             URL.revokeObjectURL(url);
-
         }
+    }
+
+    async renderForBenchmark(graph) {
+
+        this.clear();
+        this.width = this.container.clientWidth || 1000;
+        this.height = 650;
+
+        const renderStart = performance.now();
+
+        this.svg = d3
+            .select(this.container)
+            .append('svg')
+            .attr('width', this.width)
+            .attr('height', this.height)
+            .attr('viewBox', `0 0 ${this.width} ${this.height}`);
+
+        const zoomLayer = this.svg.append('g').attr('class', 'zoom-layer');
+        const linksLayer = zoomLayer.append('g').attr('class', 'links');
+        const nodesLayer = zoomLayer.append('g').attr('class', 'nodes');
+        const link = linksLayer
+                .selectAll('g')
+                .data(graph.edges)
+                .enter()
+                .append('g');
+
+        link.append('line');
+
+        const node = nodesLayer
+                .selectAll('g')
+                .data(graph.nodes)
+                .enter()
+                .append('g');
+
+        node.append('circle').attr('r', 9);
+        node.append('text').text(d => d.name);
+
+        const renderEnd = performance.now();
+        const renderTime = renderEnd - renderStart;
+        const layoutStart = performance.now();
+
+        this.simulation = d3.forceSimulation(graph.nodes).force('link', d3.forceLink(graph.edges).id(d => d.id).distance(120))
+                .force('charge', d3.forceManyBody().strength(-300))
+                .force('center', d3.forceCenter(this.width / 2, this.height / 2))
+                .force('collision', d3.forceCollide().radius(25));
+
+        await new Promise(resolve => {
+            this.simulation.on('end', resolve);
+        });
+
+        const layoutEnd = performance.now();
+
+        return {
+            layoutTime: layoutEnd - layoutStart,
+            renderTime: renderTime,
+            totalTime: layoutEnd - renderStart
+        };
     }
 
     clear() {

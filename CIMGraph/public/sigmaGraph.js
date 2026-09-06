@@ -12,6 +12,15 @@ function escapeXml(value) {
         .replace(/'/g, '&apos;');
 }
 
+function nextFrameForSigma() {
+
+    return new Promise(resolve => {
+        requestAnimationFrame(() => {
+            requestAnimationFrame(resolve);
+        });
+    });
+}
+
 export class SigmaGraph {
     constructor(container) {
         this.container = container;
@@ -177,19 +186,11 @@ export class SigmaGraph {
                 return;
             }
 
-            context.drawImage(
-                layer,
-                0,
-                0,
-                width,
-                height
-            );
+            context.drawImage(layer, 0, 0, width, height);
         });
 
         return await new Promise(resolve => {
-
             canvas.toBlob(resolve, 'image/png');
-
         });
     }
 
@@ -207,8 +208,7 @@ export class SigmaGraph {
 
         this.graph.forEachNode((node, attributes) => {
 
-            const display =
-                this.renderer.getNodeDisplayData(node);
+            const display = this.renderer.getNodeDisplayData(node);
 
             if (!display) {
                 return;
@@ -233,43 +233,40 @@ export class SigmaGraph {
         });
 
         let svg = `
-    <svg xmlns="http://www.w3.org/2000/svg"
-        width="${width}"
-        height="${height}"
-        viewBox="0 0 ${width} ${height}">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                width="${width}"
+                height="${height}"
+                viewBox="0 0 ${width} ${height}">
 
-        <rect
-            width="100%"
-            height="100%"
-            fill="white"
-        />
-    `;
+            <rect
+                width="100%"
+                height="100%"
+                fill="white"
+            />
+        `;
 
         // VEZE
 
         this.graph.forEachEdge(
             (edge, attributes, source, target) => {
 
-                const sourcePosition =
-                    nodePositions[source];
-
-                const targetPosition =
-                    nodePositions[target];
+                const sourcePosition = nodePositions[source];
+                const targetPosition = nodePositions[target];
 
                 if (!sourcePosition || !targetPosition) {
                     return;
                 }
 
                 svg += `
-        <line
-            x1="${sourcePosition.x}"
-            y1="${sourcePosition.y}"
-            x2="${targetPosition.x}"
-            y2="${targetPosition.y}"
-            stroke="#999"
-            stroke-width="1"
-        />
-    `;
+                    <line
+                        x1="${sourcePosition.x}"
+                        y1="${sourcePosition.y}"
+                        x2="${targetPosition.x}"
+                        y2="${targetPosition.y}"
+                        stroke="#999"
+                        stroke-width="1"
+                    />
+                `;
             }
         );
 
@@ -280,28 +277,113 @@ export class SigmaGraph {
             const name = escapeXml(node.name);
 
             svg += `
-        <circle
-            cx="${node.x}"
-            cy="${node.y}"
-            r="${node.size}"
-            fill="${node.color}"
-        />
+                <circle
+                    cx="${node.x}"
+                    cy="${node.y}"
+                    r="${node.size}"
+                    fill="${node.color}"
+                />
 
-        <text
-            x="${node.x + node.size + 5}"
-            y="${node.y + 4}"
-            font-family="Arial"
-            font-size="12"
-            fill="#222"
-        >${name}</text>
-    `;
+                <text
+                    x="${node.x + node.size + 5}"
+                    y="${node.y + 4}"
+                    font-family="Arial"
+                    font-size="12"
+                    fill="#222"
+                >${name}</text>
+            `;
         });
 
-        svg += `
-    </svg>
-    `;
+        svg += `</svg>`;
 
         return svg;
+    }
+
+    async renderForBenchmark(graph) {
+
+        this.clear();
+
+        const totalStart = performance.now();
+        const renderStart = performance.now();
+
+        this.graph = new Graph();
+
+        graph.nodes.forEach(node => {
+
+            this.graph.addNode(
+                node.id,
+                {
+                    label: node.name || node.id,
+                    size: 8,
+                    color: '#4f81bd',
+                    type: 'circle',
+                    cimType: node.type || ''
+                }
+            );
+        });
+
+        graph.edges.forEach(edge => {
+
+            if (!this.graph.hasNode(edge.source) || !this.graph.hasNode(edge.target)) {
+                return;
+            }
+
+            if (this.graph.hasEdge(edge.source, edge.target)) {
+                return;
+            }
+
+            this.graph.addEdge(edge.source, edge.target,
+                {
+                    label: edge.propertyName || '',
+                    size: 1,
+                    color: '#999'
+                }
+            );
+        });
+
+        this.graph.forEachNode(node => {
+            this.graph.setNodeAttribute(node, 'x', Math.random());
+            this.graph.setNodeAttribute(node, 'y', Math.random());
+        });
+
+        const layoutStart = performance.now();
+
+        forceAtlas2.assign(this.graph,
+            {
+                iterations: 100,
+                settings: {
+                    gravity: 1,
+                    scalingRatio: 10,
+                    strongGravityMode: true,
+                    slowDown: 1,
+                    barnesHutOptimize: true
+                }
+            }
+        );
+
+        const layoutEnd = performance.now();
+        const rendererStart = performance.now();
+
+        this.renderer = new Sigma(this.graph, this.container,
+            {
+                settings: {
+                    autoRescale: 'once',
+                    minCameraRatio: 0.1,
+                    maxCameraRatio: 5,
+                    renderLabels: true
+                }
+            }
+        );
+
+        await nextFrameForSigma();
+
+        const rendererEnd = performance.now();
+
+        return {
+            layoutTime: layoutEnd - layoutStart,
+            renderTime: rendererEnd - rendererStart,
+            totalTime: rendererEnd - totalStart
+        };
     }
 
     clear() {
