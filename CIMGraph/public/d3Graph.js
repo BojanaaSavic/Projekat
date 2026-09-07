@@ -173,6 +173,7 @@ export class D3Graph {
         this.height = 650;
 
         const renderStart = performance.now();
+        const isLargeGraph = graph.nodes.length > 1000;
 
         this.svg = d3
             .select(this.container)
@@ -199,13 +200,17 @@ export class D3Graph {
                 .append('g');
 
         node.append('circle').attr('r', 9);
-        node.append('text').text(d => d.name);
+
+        if (!isLargeGraph) {
+            node.append('text').text(d => d.name);
+        }
 
         const renderEnd = performance.now();
         const renderTime = renderEnd - renderStart;
         const layoutStart = performance.now();
 
-        this.simulation = d3.forceSimulation(graph.nodes).force('link', d3.forceLink(graph.edges).id(d => d.id).distance(120))
+        this.simulation = d3.forceSimulation(graph.nodes).alphaDecay(isLargeGraph ? 0.08 : 0.022)
+            .force('link', d3.forceLink(graph.edges).id(d => d.id).distance(120))
                 .force('charge', d3.forceManyBody().strength(-300))
                 .force('center', d3.forceCenter(this.width / 2, this.height / 2))
                 .force('collision', d3.forceCollide().radius(25));

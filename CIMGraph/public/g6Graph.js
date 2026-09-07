@@ -21,6 +21,95 @@ export class G6Graph {
         return value;
     }
 
+    async createBenchmarkData(graph) {
+        const includeMetadata = graph.nodes.length <= 1000;
+        const nodes = [];
+        const edges = [];
+        const batchSize = 500;
+
+        for (let start = 0; start < graph.nodes.length; start += batchSize) {
+            const end = Math.min(start + batchSize, graph.nodes.length);
+
+            for (let index = start; index < end; index++) {
+                const node = graph.nodes[index];
+                nodes.push({
+                    id: node.id,
+                    ...(includeMetadata ? {
+                        data: {
+                            name: node.name,
+                            type: node.type || ''
+                        }
+                    } : {})
+                });
+            }
+
+            await new Promise(requestAnimationFrame);
+        }
+
+        for (let start = 0; start < graph.edges.length; start += batchSize) {
+            const end = Math.min(start + batchSize, graph.edges.length);
+
+            for (let index = start; index < end; index++) {
+                const edge = graph.edges[index];
+                edges.push({
+                    id: edge.id,
+                    source: this.getNodeId(edge.source),
+                    target: this.getNodeId(edge.target)
+                });
+            }
+
+            await new Promise(requestAnimationFrame);
+        }
+
+        return { nodes, edges };
+    }
+
+    getNodeStyle(nodeCount) {
+        const showLabels = nodeCount <= 1000;
+
+        return {
+            type: 'circle',
+            style: {
+                size: 18,
+                fill: '#4f81bd',
+                stroke: '#2f5597',
+                lineWidth: 1,
+                ...(showLabels ? {
+                    labelText: node => node.data.name,
+                    labelFill: '#222',
+                    labelFontSize: 12,
+                    labelPlacement: 'right',
+                    labelOffsetX: 8
+                } : {})
+            }
+        };
+    }
+
+    getEdgeStyle(nodeCount) {
+        return {
+            type: 'line',
+            style: {
+                stroke: '#999',
+                lineWidth: nodeCount > 2000 ? 1 : 1.5,
+                endArrow: nodeCount <= 2000
+            }
+        };
+    }
+
+    getLayout(nodeCount) {
+        return {
+            type: 'force-atlas2',
+            preventOverlap: nodeCount <= 1000,
+            nodeSize: 18,
+            nodeSpacing: nodeCount > 1000 ? 8 : 30,
+            kr: nodeCount > 1000 ? 8 : 20,
+            kg: 1,
+            maxIteration: nodeCount > 2000 ? 80 : nodeCount > 1000 ? 150 : 500,
+            mode: 'linlog',
+            barnesHut: true
+        };
+    }
+
     render(graph, onNodeDoubleClick) {
 
         this.clear();
@@ -30,14 +119,12 @@ export class G6Graph {
 
         const data = {
             nodes: graph.nodes.map(node => ({
-
                 id: node.id,
                 data: {
                     name: node.name,
                     type: node.type || ''
                 }
             })),
-
             edges: graph.edges.map(edge => ({
 
                 id: edge.id,
@@ -53,43 +140,9 @@ export class G6Graph {
             height: height,
             autoFit: 'view',
             data: data,
-            node: {
-
-                type: 'circle',
-                style: {
-
-                    size: 18,
-                    fill: '#4f81bd',
-                    stroke: '#2f5597',
-                    lineWidth: 1,
-                    labelText: node => node.data.name,
-                    labelFill: '#222',
-                    labelFontSize: 12,
-                    labelPlacement: 'right',
-                    labelOffsetX: 8
-                }
-            },
-            edge: {
-
-                type: 'line',
-                style: {
-                    stroke: '#999',
-                    lineWidth: 1.5,
-                    endArrow: true
-                }
-            },
-            layout: {
-
-                type: 'force-atlas2',
-                preventOverlap: true,
-                nodeSize: 18,
-                nodeSpacing: 30,
-                kr: 20,
-                kg: 1,
-                maxIteration: 500,
-                mode: 'linlog',
-                barnesHut: true
-            },
+            node: this.getNodeStyle(graph.nodes.length),
+            edge: this.getEdgeStyle(graph.nodes.length),
+            layout: this.getLayout(graph.nodes.length),
             behaviors: [
 
                 'drag-element',
@@ -246,65 +299,19 @@ export class G6Graph {
 
         const width = this.container.clientWidth || 1000;
         const height = 650;
-        const data = {
-            nodes: graph.nodes.map(node => ({
-                    id: node.id,
-                    data: {
-                        name: node.name,
-                        type: node.type || ''
-                    }
-                })),
-
-            edges:
-                graph.edges.map(edge => ({
-                    id: edge.id,
-                    source: this.getNodeId(edge.source),
-                    target: this.getNodeId(edge.target)
-                }))
-        };
+        const data = await this.createBenchmarkData(graph);
 
         const totalStart = performance.now();
         const renderStart = performance.now();
-
         this.graph = new G6.Graph({
                 container: this.container,
                 width,
                 height,
                 autoFit: 'view',
                 data,
-                node: {
-                    type: 'circle',
-                    style: {
-                        size: 18,
-                        fill: '#4f81bd',
-                        stroke: '#2f5597',
-                        lineWidth: 1,
-                        labelText: node => node.data.name,
-                        labelFill: '#222',
-                        labelFontSize: 12,
-                        labelPlacement: 'right',
-                        labelOffsetX: 8
-                    }
-                },
-                edge: {
-                    type: 'line',
-                    style: {
-                        stroke: '#999',
-                        lineWidth: 1.5,
-                        endArrow: true
-                    }
-                },
-                layout: {
-                    type: 'force-atlas2',
-                    preventOverlap: true,
-                    nodeSize: 18,
-                    nodeSpacing: 30,
-                    kr: 20,
-                    kg: 1,
-                    maxIteration: 500,
-                    mode: 'linlog',
-                    barnesHut: true
-                }
+                node: this.getNodeStyle(graph.nodes.length),
+                edge: this.getEdgeStyle(graph.nodes.length),
+                layout: this.getLayout(graph.nodes.length)
             });
 
         const renderEnd = performance.now();

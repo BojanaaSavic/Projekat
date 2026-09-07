@@ -24,15 +24,32 @@ export class GraphService {
             };
         }
 
+        const instanceLimit = Number.isInteger(limit) && limit > 0 ? limit : null;
+        const relationLimit = instanceLimit ? Math.max(1, Math.floor(instanceLimit * 0.4)) : null;
 
         const query = `SELECT DISTINCT ?instance ?instanceName ?relation ?target ?targetName ?targetType
             WHERE {
 
-                ?instance a <${classUri}> .
+                {
+                    SELECT DISTINCT ?instance ?relation ?target
+                    WHERE {
+                        {
+                            SELECT DISTINCT ?instance
+                            WHERE {
+                                ?instance a <${classUri}> .
+                            }
+                            ORDER BY ?instance
+                            ${instanceLimit ? `LIMIT ${instanceLimit}` : ''}
+                        }
 
-                ?instance ?relation ?target .
+                        ?instance ?relation ?target .
 
-                FILTER (isIRI(?target))
+                        FILTER (isIRI(?target))
+                        FILTER (?relation != <${RDF}type>)
+                    }
+                    ORDER BY ?instance ?relation ?target
+                    ${relationLimit ? `LIMIT ${relationLimit}` : ''}
+                }
 
                 OPTIONAL {
                     ?instance <${CIM}IdentifiedObject.name> ?instanceName .
@@ -46,9 +63,7 @@ export class GraphService {
                     ?target a ?targetType .
                 }
 
-                FILTER (?relation != <${RDF}type>)
             }
-            ${limit ? `LIMIT ${limit}` : ''}
         `;
 
 

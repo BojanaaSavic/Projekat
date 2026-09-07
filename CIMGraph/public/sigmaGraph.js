@@ -305,6 +305,7 @@ export class SigmaGraph {
 
         const totalStart = performance.now();
         const renderStart = performance.now();
+        const isLargeGraph = graph.nodes.length > 1000;
 
         this.graph = new Graph();
 
@@ -370,7 +371,7 @@ export class SigmaGraph {
                     autoRescale: 'once',
                     minCameraRatio: 0.1,
                     maxCameraRatio: 5,
-                    renderLabels: true
+                    renderLabels: !isLargeGraph
                 }
             }
         );

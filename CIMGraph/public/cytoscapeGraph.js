@@ -14,6 +14,108 @@ export class CytoscapeGraph {
         this.cy = null;
     }
 
+    getInitialPosition(index, nodeCount, width, height) {
+        const columns = Math.ceil(Math.sqrt(nodeCount));
+        const spacing = Math.max(24, Math.min(width, height) / columns);
+
+        return {
+            x: (index % columns) * spacing + spacing / 2,
+            y: Math.floor(index / columns) * spacing + spacing / 2
+        };
+    }
+
+    async createBenchmarkElementsAsync(graph, width, height) {
+        const isLargeGraph = graph.nodes.length > 1000;
+        const elements = [];
+        const batchSize = 500;
+
+        for (let start = 0; start < graph.nodes.length; start += batchSize) {
+            const end = Math.min(start + batchSize, graph.nodes.length);
+
+            for (let index = start; index < end; index++) {
+                const node = graph.nodes[index];
+                elements.push({
+                    data: {
+                        id: node.id,
+                        ...(isLargeGraph ? {} : {
+                            name: node.name,
+                            type: node.type || ''
+                        })
+                    },
+                    position: this.getInitialPosition(index, graph.nodes.length, width, height)
+                });
+            }
+
+            await new Promise(requestAnimationFrame);
+        }
+
+        for (let start = 0; start < graph.edges.length; start += batchSize) {
+            const end = Math.min(start + batchSize, graph.edges.length);
+
+            for (let index = start; index < end; index++) {
+                const edge = graph.edges[index];
+                const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
+                const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
+
+                elements.push({
+                    data: {
+                        id: edge.id,
+                        source: sourceId,
+                        target: targetId
+                    }
+                });
+            }
+
+            await new Promise(requestAnimationFrame);
+        }
+
+        return elements;
+    }
+
+    getBenchmarkStyle(nodeCount) {
+        const isLargeGraph = nodeCount > 1000;
+
+        return [
+            {
+                selector: 'node',
+                style: {
+                    'background-color': '#4f81bd',
+                    'width': 14,
+                    'height': 14,
+                    ...(isLargeGraph ? {} : {
+                        'label': 'data(name)',
+                        'color': '#222',
+                        'font-size': '12px'
+                    })
+                }
+            },
+            {
+                selector: 'edge',
+                style: {
+                    'width': 1,
+                    'line-color': '#999',
+                    'curve-style': 'straight'
+                }
+            }
+        ];
+    }
+
+    getBenchmarkLayout(nodeCount) {
+        return {
+            name: 'cose',
+            animate: false,
+            randomize: false,
+            fit: true,
+            padding: 40,
+            numIter: nodeCount > 5000 ? 25 : nodeCount > 1000 ? 50 : 250,
+            idealEdgeLength: nodeCount > 1000 ? 30 : 50,
+            nodeRepulsion: nodeCount > 1000 ? 1000 : 4500,
+            edgeElasticity: 0.45,
+            gravity: 0.25,
+            refresh: 0
+        };
+    }
+
     render(graph, onNodeDoubleClick) {
 
         this.clear();
@@ -231,65 +333,22 @@ export class CytoscapeGraph {
 
         this.clear();
 
-        const elements = [];
-
-        graph.nodes.forEach(node => {
-
-            elements.push({
-                data: {
-                    id: node.id,
-                    name: node.name,
-                    type: node.type || ''
-                }
-            });
-        });
-
-        graph.edges.forEach(edge => {
-
-            const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
-            const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
-
-            elements.push({
-                data: {
-                    id: edge.id,
-                    source: sourceId,
-                    target: targetId,
-                    property: edge.property,
-                    propertyName: edge.propertyName || ''
-                }
-            });
-        });
-
         const totalStart = performance.now();
         const renderStart = performance.now();
+        const isLargeGraph = graph.nodes.length > 1000;
 
         this.cy = cytoscape({
 
             container: this.container,
-            elements: elements,
-            style: [
-                {
-                    selector: 'node',
-                    style: {
-                        'background-color': '#4f81bd',
-                        'label': 'data(name)',
-                        'color': '#222',
-                        'font-size': '12px',
-                        'width': 18,
-                        'height': 18
-                    }
-                },
-                {
-                    selector: 'edge',
-                    style: {
-                        'width': 1.5,
-                        'line-color': '#999'
-                    }
-                }
-            ],
+            elements: await this.createBenchmarkElementsAsync(graph, this.container.clientWidth || 1000, 650),
+            style: this.getBenchmarkStyle(graph.nodes.length),
 
             minZoom: 0.1,
-            maxZoom: 5
+            maxZoom: 5,
+            hideEdgesOnViewport: isLargeGraph,
+            textureOnViewport: isLargeGraph,
+            motionBlur: false,
+            pixelRatio: 1
         });
 
         const renderEnd = performance.now();
@@ -297,12 +356,7 @@ export class CytoscapeGraph {
 
         await new Promise(resolve => {
 
-            const layout = this.cy.layout({
-                    name: 'cose',
-                    animate: false,
-                    fit: true,
-                    padding: 40
-                });
+            const layout = this.cy.layout(this.getBenchmarkLayout(graph.nodes.length));
             layout.one('layoutstop', resolve);
             layout.run();
         });
