@@ -95,101 +95,27 @@ export class GraphService {
         return this.createGraph(nodes, edges, query);
     }
 
-
-    /*
-     * GRAF GRUPA
-     *
-     * classUri + propertyUri određuju grupe.
-     *
-     * Čvorovi: grupa i elementi grupe
-     *
-     * Veze: grupa -> element
-     */
-    async getGroupGraph(classUri, propertyUri, groupUri = null) {
-
-        if (!classUri || !propertyUri) {
-
+    async getEquipmentGraph(nodeUri) {
+        
+        if (!nodeUri) {
             return {
                 nodes: [],
-                edges: []
+                edges: [],
+                query: ''
             };
         }
 
-        const groupFilter = groupUri ? `FILTER (?group = <${groupUri}>)` : '';
-        const query = `SELECT DISTINCT ?item ?itemName ?itemType ?group ?groupName ?groupType
+        const query = `SELECT DISTINCT ?equipment ?equipmentName ?equipmentType
             WHERE {
-
-                ?item a <${classUri}> .
-
-                ?item <${propertyUri}> ?group .
-
-                ${groupFilter}
-
-                OPTIONAL {
-                    ?item <${CIM}IdentifiedObject.name> ?itemName .
-                }
-
-                OPTIONAL {
-                    ?item a ?itemType .
-                }
-
-                OPTIONAL {
-                    ?group <${CIM}IdentifiedObject.name> ?groupName .
-                }
-
-                OPTIONAL {
-                    ?group a ?groupType .
-                }
-            }
-        `;
-
-        const results = await this.sparql.query(query);
-        const nodes = new Map();
-        const edges = new Map();
-
-        results.forEach(binding => {
-
-            const item = binding.get('item')?.value;
-            const itemName = binding.get('itemName')?.value;
-            const itemType = binding.get('itemType')?.value;
-            const group = binding.get('group')?.value;
-            const groupName = binding.get('groupName')?.value;
-            const groupType = binding.get('groupType')?.value;
-
-            if (!item || !group) {
-                return;
-            }
-
-            this.addNode(nodes, group, groupName || this.getLocalName(group), groupType ? this.getLocalName(groupType) : 'Group');
-            this.addNode(nodes, item, itemName || this.getLocalName(item), itemType ? this.getLocalName(itemType) : 'Item');
-            this.addEdge(edges, group, item, propertyUri, this.getLocalName(propertyUri));
-        });
-
-        return this.createGraph(nodes, edges, query);
-    }
-
-    async getEquipmentGraph(containerUri) {
-
-        if (!containerUri) {
-            return {
-                nodes: [],
-                edges: []
-            };
-        }
-
-        const query = `SELECT DISTINCT ?equipment ?equipmentName ?equipmentType ?property
-            WHERE {
-
                 ?equipment a ?equipmentType .
 
                 ?equipmentType <${RDFS}subClassOf>* <${CIM}Equipment> .
 
-                ?equipment ?property <${containerUri}> .
+                ?equipment <${CIM}Equipment.EquipmentContainer> <${nodeUri}> .
 
                 OPTIONAL { ?equipment <${CIM}IdentifiedObject.name> ?equipmentName . }
-
-                FILTER (?property != <${RDF}type>)
             }
+            ORDER BY ?equipmentName
         `;
 
         const results = await this.sparql.query(query);
@@ -197,17 +123,14 @@ export class GraphService {
         const nodes = new Map();
         const edges = new Map();
 
-        // KONTEJNER
-        this.addNode(nodes, containerUri, this.getLocalName(containerUri), 'Container');
+        this.addNode(nodes, nodeUri, this.getLocalName(nodeUri), 'EquipmentContainer');
 
         results.forEach(binding => {
-
             const equipment = binding.get('equipment')?.value;
             const equipmentName = binding.get('equipmentName')?.value;
             const equipmentType = binding.get('equipmentType')?.value;
-            const property = binding.get('property')?.value;
 
-            if (!equipment || !property) {
+            if (!equipment) {
                 return;
             }
 
@@ -218,7 +141,71 @@ export class GraphService {
                 equipmentType ? this.getLocalName(equipmentType) : 'Equipment'
             );
 
-            this.addEdge(edges, containerUri, equipment, property, this.getLocalName(property));
+            this.addEdge(edges, nodeUri, equipment, `${CIM}Equipment.EquipmentContainer`, 'EquipmentContainer');
+        });
+
+        return this.createGraph(nodes, edges, query);
+    }
+
+    async getContainerGroupGraph(containerTypeUri, containerUri = null) {
+
+        if (!containerTypeUri) {
+
+            return {
+                nodes: [],
+                edges: [],
+                query: ''
+            };
+        }
+
+        const containerFilter = containerUri ? `FILTER (?container = <${containerUri}>)` : '';
+        const query = ` SELECT DISTINCT ?container ?containerName ?equipment ?equipmentName ?equipmentType
+            WHERE {
+                ?container a <${containerTypeUri}> .
+
+                ${containerFilter}
+
+                ?equipment a ?equipmentType .
+
+                ?equipmentType <${RDFS}subClassOf>* <${CIM}Equipment> .
+
+                ?equipment <${CIM}Equipment.EquipmentContainer> ?container .
+
+                OPTIONAL { ?container <${CIM}IdentifiedObject.name> ?containerName . }
+
+                OPTIONAL { ?equipment <${CIM}IdentifiedObject.name> ?equipmentName . }
+            }
+            ORDER BY ?containerName ?equipmentName
+        `;
+
+        const results = await this.sparql.query(query);
+
+        const nodes = new Map();
+        const edges = new Map();
+
+        results.forEach(binding => {
+
+            const container = binding.get('container')?.value;
+            const containerName = binding.get('containerName')?.value;
+
+            const equipment = binding.get('equipment')?.value;
+            const equipmentName = binding.get('equipmentName')?.value;
+            const equipmentType = binding.get('equipmentType')?.value;
+
+            if (!container || !equipment) {
+                return;
+            }
+
+            this.addNode(nodes, container, containerName || this.getLocalName(container), this.getLocalName(containerTypeUri));
+
+            this.addNode(
+                nodes,
+                equipment,
+                equipmentName || this.getLocalName(equipment),
+                equipmentType ? this.getLocalName(equipmentType) : 'Equipment'
+            );
+
+            this.addEdge(edges, container, equipment, `${CIM}Equipment.EquipmentContainer`, 'EquipmentContainer');
         });
 
         return this.createGraph(nodes, edges, query);
@@ -231,7 +218,6 @@ export class GraphService {
         }
 
         if (!nodes.has(id)) {
-
             nodes.set(id, {
                 id,
                 name: name || this.getLocalName(id),

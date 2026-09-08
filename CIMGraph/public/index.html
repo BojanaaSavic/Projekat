@@ -56,8 +56,8 @@
                 Instance po klasi
             </option>
 
-            <option value="groups">
-                Grupe
+            <option value="containers">
+                Grupisanje prema EquipmentContainer-u
             </option>
 
         </select>
@@ -111,41 +111,30 @@
 
     </section>
 
-    <!-- IZBOR PROPERTY-JA -->
-
     <section
-        id="propertySection"
+        id="containerSection"
         class="card hidden"
     >
+        <h2>3. EquipmentContainer</h2>
 
-        <h2>3. Izbor relacije</h2>
-
-        <label for="propertySelect">
-            Relacija:
+        <label for="containerTypeSelect">
+            Tip kontejnera:
         </label>
 
-        <select id="propertySelect">
+        <select id="containerTypeSelect">
 
             <option value="">
-                -- Izaberi relaciju --
+                -- Izaberi tip kontejnera --
             </option>
-
         </select>
-
-        <p id="propertyDescription"></p>
-
     </section>
 
-    <!-- GRUPE -->
-
     <section
-        id="groupSection"
+        id="containerGroupsSection"
         class="card hidden"
     >
-        <h2>4. Grupe</h2>
-
-        <div id="groups"></div>
-
+        <h2>4. Kontejneri</h2>
+        <div id="containerGroups"></div>
     </section>
 
     <!-- GRAF -->
@@ -228,12 +217,7 @@ import { G6Graph } from '/g6Graph.js';
 const graphTypeSelect = document.getElementById('graphTypeSelect');
 const graphLibrarySelect = document.getElementById('graphLibrarySelect');
 const classSelect = document.getElementById('classSelect');
-const propertySelect = document.getElementById('propertySelect');
 const classSection = document.getElementById('classSection');
-const propertySection = document.getElementById('propertySection');
-const groupSection = document.getElementById('groupSection');
-const groups = document.getElementById('groups');
-const propertyDescription = document.getElementById('propertyDescription');
 const graphSection = document.getElementById('graphSection');
 const graphTitle = document.getElementById('graphTitle');
 const graphContainer = document.getElementById('graphContainer');
@@ -251,6 +235,10 @@ const exportSvgButton = document.getElementById('exportSvgButton');
 const exportPngButton = document.getElementById('exportPngButton');
 const querySection = document.getElementById('querySection');
 const sparqlQuery = document.getElementById('sparqlQuery');
+const containerSection = document.getElementById('containerSection');
+const containerTypeSelect = document.getElementById('containerTypeSelect');
+const containerGroupsSection = document.getElementById('containerGroupsSection');
+const containerGroups = document.getElementById('containerGroups');
 
 const graphRenderers = {
     d3: d3Graph,
@@ -395,6 +383,39 @@ async function loadGraph(url, title) {
     }
 }
 
+async function loadEquipmentContainerTypes() {
+    try {
+        const response = await fetch('/api/equipment-containers');
+
+        if (!response.ok) {
+            throw new Error('Greška prilikom učitavanja EquipmentContainer tipova.');
+        }
+
+        const containers = await response.json();
+
+        containerTypeSelect.innerHTML = `
+            <option value="">
+                -- Izaberi tip kontejnera --
+            </option>
+        `;
+
+        containers.forEach(container => {
+
+            const option = document.createElement('option');
+
+            option.value = container.uri;
+            option.textContent = container.name;
+
+            containerTypeSelect.appendChild(option);
+        });
+
+    }
+    catch (error) {
+        console.error(error);
+        status.textContent = 'Greška prilikom učitavanja EquipmentContainer tipova.';
+    }
+}
+
 async function handleNodeDoubleClick(node) {
 
     if (!node || !node.id) {
@@ -403,7 +424,7 @@ async function handleNodeDoubleClick(node) {
 
     await loadGraph(
         `/api/graph?type=equipment&container=${encodeURIComponent(node.id)}`,
-        `Oprema kontejnera: ${node.name || node.id}`
+        `Oprema: ${node.name || node.id}`
     );
 }
 
@@ -474,10 +495,10 @@ graphTypeSelect.addEventListener('change', async function () {
         graphSection.classList.add('hidden');
         exportControls.classList.add('hidden');
         classSection.classList.add('hidden');
-        propertySection.classList.add('hidden');
-        groupSection.classList.add('hidden');
         querySection.classList.add('hidden');
-        groups.innerHTML = '';
+        containerSection.classList.add('hidden');
+        containerGroupsSection.classList.add('hidden');
+        containerGroups.innerHTML = '';
 
         // INSTANCE PO KLASI
 
@@ -486,11 +507,9 @@ graphTypeSelect.addEventListener('change', async function () {
             status.textContent = 'Izaberite klasu.';
         }
 
-        // GRUPE
-
-        if (type === 'groups') {
-            classSection.classList.remove('hidden');
-            status.textContent = 'Izaberite klasu.';
+        if (type === 'containers') {
+            containerSection.classList.remove('hidden');
+            status.textContent = 'Izaberite tip EquipmentContainer-a.';
         }
     }
 );
@@ -500,17 +519,7 @@ graphTypeSelect.addEventListener('change', async function () {
 classSelect.addEventListener('change', async function () {
         const classUri = this.value;
 
-        propertySelect.innerHTML = `
-            <option value="">
-                -- Izaberi relaciju --
-            </option>
-        `;
-
-        groups.innerHTML = '';
-        groupSection.classList.add('hidden');
-
         if (!classUri) {
-            propertySection.classList.add('hidden');
             graphSection.classList.add('hidden');
 
             return;
@@ -527,125 +536,80 @@ classSelect.addEventListener('change', async function () {
             );
             return;
         }
-
-        // GRUPE
-
-        if (type === 'groups') {
-            try {
-                status.textContent = 'Učitavanje relacija...';
-
-                const response = await fetch(`/api/properties?class=${encodeURIComponent(classUri)}`);
-                const properties = await response.json();
-
-                properties.forEach(property => {
-                    const option = document.createElement('option');
-
-                    option.value = property.uri;
-                    option.textContent = property.name;
-                    option.dataset.comment = property.comment || '';
-
-                    propertySelect.appendChild(option);
-                });
-
-                propertySection.classList.remove('hidden');
-
-                status.textContent = `Pronađeno ${properties.length} relacija.`;
-
-            }
-            catch (error) {
-                console.error(error);
-                status.textContent = 'Greška prilikom učitavanja relacija.';
-            }
-        }
     }
 );
 
-// IZBOR PROPERTY-JA
+containerTypeSelect.addEventListener('change', async function () {
+    const containerType = this.value;
 
-propertySelect.addEventListener('change', async function () {
-        const propertyUri = this.value;
-        const classUri = classSelect.value;
+    containerGroups.innerHTML = '';
+    containerGroupsSection.classList.add('hidden');
+    graphSection.classList.add('hidden');
 
-        groups.innerHTML = '';
-        groupSection.classList.add('hidden');
+    if (!containerType) {
+        return;
+    }
 
-        if (!propertyUri || !classUri) {
+    try {
+        status.textContent = 'Učitavanje EquipmentContainer grupa...';
+
+        const response = await fetch(`/api/equipment-groups?containerType=${encodeURIComponent(containerType)}`);
+
+        if (!response.ok) {
+
+            const error = await response.json();
+
+            throw new Error(error.error || 'Greška prilikom učitavanja grupa.');
+        }
+
+        const data = await response.json();
+
+        if (!Array.isArray(data) || data.length === 0) {
+
+            containerGroups.innerHTML = '<p>Nema pronađenih EquipmentContainer-a.</p>';
+            containerGroupsSection.classList.remove('hidden');
+            status.textContent = 'Nema pronađenih kontejnera.';
+
             return;
         }
 
-        const selectedOption = this.options[this.selectedIndex];
+        data.forEach(container => {
 
-        propertyDescription.textContent = selectedOption.dataset.comment || '';
+            const element = document.createElement('div');
 
-        try {
-            status.textContent = 'Grupisanje podataka...';
-
-            const response = await fetch(
-                `/api/group?class=${encodeURIComponent(classUri)}&property=${encodeURIComponent(propertyUri)}`);
-            const data = await response.json();
-
-            if (!Array.isArray(data) || data.length === 0
-            ) {
-                groups.innerHTML = '<p>Nema podataka za izabranu relaciju.</p>';
-                groupSection.classList.remove('hidden');
-                status.textContent = 'Nema podataka za grupisanje.';
-
-                return;
-            }
-
-            data.forEach(group => {
-                const groupElement = document.createElement('div');
-
-                groupElement.className = 'group';
-
-                groupElement.addEventListener('click', async function () {
-                        await loadGraph(
-                            `/api/graph?type=groups&class=${encodeURIComponent(classUri)}&property=${encodeURIComponent(propertyUri)}&group=${encodeURIComponent(group.uri)}`,
-                            `Graf grupe: ${group.name}`
-                        );
-                    }
-                );
-
-                const title = document.createElement('h3');
-                title.textContent = group.name;
-                const type = document.createElement('p');
-
-                if (group.type) {
-                    type.textContent = `Tip: ${group.type}`;
+            element.className = 'group';
+            element.addEventListener('click', async function () {
+                await loadGraph(
+                    `/api/graph?type=equipment&container=${encodeURIComponent(container.uri)}`,
+                    `EquipmentContainer: ${container.name}`);
                 }
+            );
 
-                const list = document.createElement('div');
+            const title = document.createElement('h3');
+            title.textContent = container.name;
+            const type = document.createElement('p');
+            type.textContent = `Tip: ${container.type}`;
+            const count = document.createElement('p');
+            count.textContent = `Broj equipment instanci: ${container.equipmentCount}`;
 
-                group.items.forEach(item => {
-                    const element = document.createElement('div');
+            element.appendChild(title);
+            element.appendChild(type);
+            element.appendChild(count);
 
-                    element.className = 'group-item';
-                    element.textContent = item.name;
-                    list.appendChild(element);
-                });
+            containerGroups.appendChild(element);
+        });
 
-                groupElement.appendChild(title);
-
-                if (group.type) {
-                    groupElement.appendChild(type);
-                }
-
-                groupElement.appendChild(list);
-                groups.appendChild(groupElement);
-            });
-
-            groupSection.classList.remove('hidden');
-
-            status.textContent = `Pronađeno ${data.length} grupa. Kliknite na grupu za prikaz njenog grafa.`;
-        }
-        catch (error) {
-            console.error(error);
-            status.textContent = 'Greška prilikom grupisanja podataka.';
-        }
+        containerGroupsSection.classList.remove('hidden');
+        status.textContent = `Pronađeno ${data.length} EquipmentContainer-a. Kliknite na kontejner za prikaz njegovog grafa.`;
     }
-);
+    catch (error) {
+        console.error(error);
+        status.textContent = `Greška: ${error.message}`;
+    }
+});
 
 loadClasses();
+loadEquipmentContainerTypes();
 
 </script>
 </body>

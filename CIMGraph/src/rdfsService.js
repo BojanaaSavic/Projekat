@@ -7,23 +7,12 @@ export class RdfsService {
 
     async getClasses() {
 
-        const query = `
-            SELECT DISTINCT ?class ?label
+        const query = `SELECT DISTINCT ?class ?label
             WHERE {
+                ?instance a ?class .
 
-                {
-                    ?class a <${RDFS}Class> .
-                }
-                UNION
-                {
-                    ?class <${RDFS}subClassOf> ?parent .
-                }
-
-                OPTIONAL {
-                    ?class <${RDFS}label> ?label .
-                }
+                OPTIONAL { ?class <${RDFS}label> ?label . }
             }
-
             ORDER BY ?class
         `;
 
@@ -49,19 +38,17 @@ export class RdfsService {
 
     async getClassInstances(classUri) {
 
-        const query = `
-            SELECT DISTINCT ?instance
+        const query = `SELECT DISTINCT ?instance
             WHERE {
-
                 ?instance a <${classUri}> .
             }
-
             ORDER BY ?instance
         `;
 
         return await this.sparql.query(query);
     }
 
+    //might be old code
     async getClassProperties(classUri) {
 
         const query = `
@@ -76,37 +63,56 @@ export class RdfsService {
 
                 OPTIONAL { ?property <${RDFS}range> ?range . }
             }
-
             ORDER BY ?property
         `;
 
         return await this.sparql.query(query);
     }
 
-    async getGroupedData(classUri, propertyUri) {
+    async getEquipmentContainerTypes() {
 
-        const query = `
-            SELECT DISTINCT ?item ?itemName ?group ?groupName ?groupType
+        const CIM = 'http://iec.ch/TC57/CIM100#';
+
+        const query = `SELECT DISTINCT ?containerType ?label
             WHERE {
+                ?containerType <${RDFS}subClassOf>* <${CIM}EquipmentContainer> .
 
-                ?item a <${classUri}> .
-
-                ?item <${propertyUri}> ?group .
-
-                OPTIONAL { ?item ?itemNameProperty ?itemName .
-                    
-                    FILTER ( ?itemNameProperty = <http://iec.ch/TC57/CIM100#IdentifiedObject.name> )
-                }
-
-                OPTIONAL { ?group ?groupNameProperty ?groupName .
-
-                    FILTER ( ?groupNameProperty = <http://iec.ch/TC57/CIM100#IdentifiedObject.name> )
-                }
-
-                OPTIONAL { ?group a ?groupType . }
+                OPTIONAL { ?containerType <${RDFS}label> ?label . }
             }
+            ORDER BY ?containerType
+        `;
 
-            ORDER BY ?groupName ?itemName
+        //FILTER (?containerType != <${CIM}EquipmentContainer>)
+        return await this.sparql.query(query);
+    }
+
+    async getEquipmentGroups(containerTypeUri) {
+
+        const CIM = 'http://iec.ch/TC57/CIM100#';
+
+        if (!containerTypeUri) {
+            return [];
+        }
+
+        const query = `SELECT DISTINCT ?group ?groupName ?groupType (COUNT(DISTINCT ?equipment) AS ?equipmentCount)
+            WHERE {
+                ?group a ?actualGroupType .
+
+                ?actualGroupType <${RDFS}subClassOf>* <${containerTypeUri}> .
+
+                ?equipment a ?equipmentType .
+
+                ?equipmentType <${RDFS}subClassOf>* <${CIM}Equipment> .
+
+                ?equipment <${CIM}Equipment.EquipmentContainer> ?group .
+
+                BIND(?actualGroupType AS ?groupType)
+
+                OPTIONAL { ?group <${CIM}IdentifiedObject.name> ?groupName . }
+            }
+            GROUP BY ?group ?groupName ?groupType
+
+            ORDER BY ?groupName
         `;
 
         return await this.sparql.query(query);

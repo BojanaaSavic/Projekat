@@ -185,89 +185,54 @@ const server = http.createServer(async (request, response) => {
                 return;
             }
 
-            if (request.method === 'GET' && request.url.startsWith('/api/properties?')) {
+            if (request.method === 'GET' && request.url === '/api/equipment-containers') {
 
-                const url = new URL(request.url, `http://localhost:${PORT}`);
-                const classUri = url.searchParams.get('class');
+                const results = await app.rdfs.getEquipmentContainerTypes();
+                const containers = results.map(binding => {
+                    const uri = binding.get('containerType')?.value;
+                    const label = binding.get('label')?.value;
 
-                if (!classUri) {
-
-                    response.writeHead(400, { 'Content-Type': 'application/json' });
-                    response.end(JSON.stringify({ error: 'Nije navedena klasa.' }));
-
-                    return;
-                }
-
-                const results = await app.rdfs.getClassProperties(classUri);
-
-                const properties =
-                    results.map(binding => {
-
-                        const uri = binding.get('property')?.value;
-                        const label = binding.get('label')?.value;
-                        const comment = binding.get('comment')?.value;
-                        const range = binding.get('range')?.value;
-
-
-                        return { uri, name: label || getClassName(uri), comment: comment || '', range: range || null };
-                    });
+                    return { uri, name: label || getClassName(uri) };
+                });
 
                 response.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-                response.end(JSON.stringify(properties));
+                response.end(JSON.stringify(containers));
 
                 return;
             }
 
-            if (request.method === 'GET' && request.url.startsWith('/api/group?')) {
+            if (request.method === 'GET' && request.url.startsWith('/api/equipment-groups?')) {
 
                 const url = new URL(request.url, `http://localhost:${PORT}`);
-                const classUri = url.searchParams.get('class');
-                const propertyUri = url.searchParams.get('property');
+                const containerType = url.searchParams.get('containerType');
 
-                if (!classUri || !propertyUri) {
+                if (!containerType) {
 
-                    response.writeHead(400, { 'Content-Type': 'application/json' });
-                    response.end(JSON.stringify({ error: 'Klasa i property su obavezni.' }));
+                    response.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+                    response.end(JSON.stringify({ error: 'Tip EquipmentContainer-a je obavezan.' }));
 
                     return;
                 }
 
-                const results = await app.rdfs.getGroupedData(classUri, propertyUri);
-                const groups = {};
+                const results = await app.rdfs.getEquipmentGroups(containerType);
 
-                results.forEach(binding => {
+                const groups = results.map(binding => {
 
-                    const item = binding.get('item')?.value;
-                    const itemName = binding.get('itemName')?.value;
-                    const group = binding.get('group')?.value;
-                    const groupName = binding.get('groupName')?.value;
-                    const groupType = binding.get('groupType')?.value;
+                    const uri = binding.get('group')?.value;
+                    const name = binding.get('groupName')?.value;
+                    const type = binding.get('groupType')?.value;
+                    const count = binding.get('equipmentCount')?.value;
 
-                    if (!group) {
-                        return;
-                    }
-
-
-                    if (!groups[group]) {
-
-                        groups[group] = {
-
-                            uri: group,
-                            name: groupName || getClassName(group),
-                            type: groupType ? getClassName(groupType) : null,
-                            items: []
-                        };
-                    }
-
-                    groups[group].items.push({
-
-                        uri: item,
-                        name: itemName || getClassName(item)
-                    });
+                    return { 
+                        uri,
+                        name: name || getClassName(uri),
+                        type: type ? getClassName(type) : getClassName(containerType),
+                        equipmentCount: count ? Number(count) : 0
+                    };
                 });
 
                 response.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-                response.end(JSON.stringify(Object.values(groups)));
+                response.end(JSON.stringify(groups));
 
                 return;
             }
@@ -303,7 +268,6 @@ const server = http.createServer(async (request, response) => {
                     const containerUri = url.searchParams.get('container');
 
                     if (!containerUri) {
-
                         response.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
                         response.end(JSON.stringify({ error: 'Kontejner je obavezan.' }));
 
