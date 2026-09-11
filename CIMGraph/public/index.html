@@ -52,6 +52,10 @@
                 -- Izaberi prikaz --
             </option>
 
+            <option value="network">
+                Cijela mreža
+            </option>
+
             <option value="instances">
                 Instance po klasi
             </option>
@@ -190,6 +194,16 @@
 
         </div>
 
+        <div id="navigationControls">
+
+            <button
+                id="backToNetworkButton"
+                class="hidden"
+            >
+                ← Nazad na cijelu mrežu
+            </button>
+
+        </div>
         <div
             id="graphContainer"
             class="graph-container"
@@ -239,7 +253,7 @@ const containerSection = document.getElementById('containerSection');
 const containerTypeSelect = document.getElementById('containerTypeSelect');
 const containerGroupsSection = document.getElementById('containerGroupsSection');
 const containerGroups = document.getElementById('containerGroups');
-
+const backToNetworkButton = document.getElementById('backToNetworkButton');
 const graphRenderers = {
     d3: d3Graph,
     cytoscape: cytoscapeGraph,
@@ -345,7 +359,7 @@ async function loadClasses() {
 
 let currentGraph = null;
 
-async function loadGraph(url, title) {
+async function loadGraph(url, title, graphType = null) {
     exportMenu.classList.add('hidden');
 
     try {
@@ -362,7 +376,9 @@ async function loadGraph(url, title) {
 
         const graph = await response.json();
         currentGraph = graph;
+        graph.graphType = graphType;
 
+        backToNetworkButton.classList.toggle('hidden', graphType !== 'substation' && graphType !== 'node');
         sparqlQuery.textContent = graph.query || '';
         querySection.classList.remove('hidden');
 
@@ -416,15 +432,33 @@ async function loadEquipmentContainerTypes() {
     }
 }
 
+backToNetworkButton.addEventListener('click', async function () {
+    
+    await loadGraph('/api/graph?type=network', 'Cijela elektroenergetska mreža', 'network');
+    }
+);
+
 async function handleNodeDoubleClick(node) {
 
     if (!node || !node.id) {
         return;
     }
 
+    if (currentGraph?.graphType === 'network') {
+
+        await loadGraph(
+            `/api/graph?type=substation&substation=${encodeURIComponent(node.id)}`,
+            `Stanica: ${node.name || node.id}`,
+            'substation'
+        );
+
+        return;
+    }
+
     await loadGraph(
-        `/api/graph?type=equipment&container=${encodeURIComponent(node.id)}`,
-        `Oprema: ${node.name || node.id}`
+        `/api/graph?type=node&node=${encodeURIComponent(node.id)}`,
+        `Čvor: ${node.name || node.id}`,
+        'node'
     );
 }
 
@@ -500,7 +534,16 @@ graphTypeSelect.addEventListener('change', async function () {
         containerGroupsSection.classList.add('hidden');
         containerGroups.innerHTML = '';
 
-        // INSTANCE PO KLASI
+        if (type === 'network') {
+
+            await loadGraph(
+                '/api/graph?type=network',
+                'Cijela elektroenergetska mreža',
+                'network'
+            );
+
+            return;
+        }
 
         if (type === 'instances') {
             classSection.classList.remove('hidden');

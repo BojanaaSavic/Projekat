@@ -7,12 +7,17 @@ export class RdfsService {
 
     async getClasses() {
 
-        const query = `SELECT DISTINCT ?class ?label
+        const query = `
+            SELECT DISTINCT ?class ?label
             WHERE {
-                ?instance a ?class .
+
+                { ?class a <${RDFS}Class> . }
+                UNION
+                { ?class <${RDFS}subClassOf> ?parent . }
 
                 OPTIONAL { ?class <${RDFS}label> ?label . }
             }
+
             ORDER BY ?class
         `;
 

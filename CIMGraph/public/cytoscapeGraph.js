@@ -158,39 +158,38 @@ export class CytoscapeGraph {
             style: [
                 {
                     selector: 'node',
-
                     style: {
                         'background-color': '#4f81bd',
+                        'width': 10,
+                        'height': 10,
                         'label': 'data(name)',
                         'color': '#222',
-                        'font-size': '12px',
+                        'font-size': '10px',
                         'text-valign': 'center',
                         'text-halign': 'right',
-                        'text-margin-x': 8,
-                        'width': 18,
-                        'height': 18
+                        'text-margin-x': 6
                     }
                 },
-
                 {
                     selector: 'edge',
-
                     style: {
-                        'width': 1.5,
+                        'width': 1,
                         'line-color': '#999',
-                        'target-arrow-color': '#999',
-                        'target-arrow-shape': 'triangle',
-                        'curve-style': 'bezier'
+                        'curve-style': 'straight'
                     }
                 }
-
             ],
 
             layout: {
                 name: 'cose',
-                animate: true,
+                animate: false,
                 fit: true,
-                padding: 40
+                padding: 40,
+                numIter: 100,
+                idealEdgeLength: 30,
+                nodeRepulsion: 500,
+                edgeElasticity: 0.45,
+                gravity: 0.25
             },
 
             minZoom: 0.1,

@@ -263,6 +263,41 @@ const server = http.createServer(async (request, response) => {
                     graph = await app.graph.getInstanceGraph(classUri, limit);
                 }
 
+                else if (type === 'network') {
+
+                    graph = await app.graph.getNetworkGraph();
+                }
+
+                else if (type === 'node') {
+
+                    const nodeUri = url.searchParams.get('node');
+
+                    if (!nodeUri) {
+
+                        response.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+                        response.end(JSON.stringify({ error: 'Čvor je obavezan.' }));
+
+                        return;
+                    }
+
+                    graph = await app.graph.getNodeGraph(nodeUri);
+                }
+
+                else if (type === 'substation') {
+
+                    const substationUri = url.searchParams.get('substation');
+
+                    if (!substationUri) {
+
+                        response.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+                        response.end(JSON.stringify({ error: 'Substation je obavezna.' }));
+
+                        return;
+                    }
+
+                    graph = await app.graph.getSubstationGraph(substationUri);
+                }
+
                 else if (type === 'equipment') {
 
                     const containerUri = url.searchParams.get('container');
