@@ -58,8 +58,8 @@ export class D3Graph {
 
         const node = nodesLayer.selectAll('g').data(graph.nodes).enter().append('g').attr('class', 'graph-node');
 
-        node.append('circle').attr('r', 9);
-        node.append('text').text(d => d.name).attr('dx', 13).attr('dy', 4);
+        node.append('circle').attr('r', 9).attr('fill', '#4f81bd');;
+        node.append('text').text(d => d.name).attr('dx', 13).attr('dy', 4).attr('fill', '#222');;
         node.append('title').text(d => {
                 if (d.type) {
                     return `${d.name}\nTip: ${d.type}`;

@@ -161,37 +161,46 @@ export class SigmaGraph {
 
     async exportPNG() {
 
-        if (!this.renderer) {
+        if (!this.renderer || !this.graph) {
             throw new Error('Sigma graf nije iscrtan.');
         }
 
-        const canvases = this.renderer.getCanvases();
-
+        const svg = await this.exportSVG();
         const width = this.container.clientWidth;
         const height = this.container.clientHeight;
 
-        const canvas = document.createElement('canvas');
+        const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
 
-        canvas.width = width;
-        canvas.height = height;
+        try {
 
-        const context = canvas.getContext('2d');
+            const image = new Image();
 
-        context.fillStyle = '#ffffff';
-        context.fillRect(0, 0, width, height);
+            await new Promise((resolve, reject) => {
 
-        Object.values(canvases).forEach(layer => {
+                image.onload = resolve;
+                image.onerror = reject;
+                image.src = url;
+            });
 
-            if (!layer) {
-                return;
-            }
+            const canvas = document.createElement('canvas');
 
-            context.drawImage(layer, 0, 0, width, height);
-        });
+            canvas.width = width;
+            canvas.height = height;
 
-        return await new Promise(resolve => {
-            canvas.toBlob(resolve, 'image/png');
-        });
+            const context = canvas.getContext('2d');
+
+            context.fillStyle = '#ffffff';
+            context.fillRect(0, 0, width, height);
+
+            context.drawImage(image, 0, 0, width, height);
+
+            return await new Promise(resolve => { canvas.toBlob(resolve, 'image/png'); });
+
+        } finally {
+
+            URL.revokeObjectURL(url);
+        }
     }
 
     async exportSVG() {

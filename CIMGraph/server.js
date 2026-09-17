@@ -42,25 +42,53 @@ async function initialize() {
     console.log('==========================================');
     console.log();
 
-
     const rdfStore = new RdfStore();
+
     await rdfStore.loadTurtle('./data/RealGrid_EQ.ttl');
 
     console.log();
     console.log(`RDF model učitan.`);
-
     console.log(`Broj RDF trojki: ${rdfStore.getQuadCount()}`);
+
+    const store = rdfStore.getStore();
+    const RDF_TYPE = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
+    const CIM = 'http://iec.ch/TC57/CIM100#';
+    const subjects = new Set();
+
+    for (const quad of store) {
+        subjects.add(quad.subject.value);
+    }
+
+    const instanceCount = subjects.size;
+    const substationCount = store.getQuads(null, RDF_TYPE, `${CIM}Substation`, null).length;
+
+    console.log(`Broj instanci: ${instanceCount}`);
+    console.log(`Broj Substation elemenata: ${substationCount}`);
 
     await rdfStore.loadRdfs('./data/CGMES_RDFS.ttl');
 
     console.log();
     console.log(`RDFS model učitan.`);
-
     console.log(`Ukupan broj trojki: ${rdfStore.getQuadCount()}`);
 
-
-    const store = rdfStore.getStore();
     const sparql = new SparqlService(store);
+
+    const query = `
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX cim: <http://iec.ch/TC57/CIM100#>
+
+        SELECT (COUNT(DISTINCT ?container) AS ?count)
+        WHERE {
+            ?container rdf:type ?class .
+            ?class rdfs:subClassOf* cim:EquipmentContainer .
+        }
+    `;
+
+    const result = await sparql.query(query);
+    const containerCount = Number(result[0]?.get('count')?.value || 0);
+
+    console.log(`Broj kontejnera: ${containerCount}`);
     const rdfs = new RdfsService(sparql);
     const graph = new GraphService(sparql);
 
