@@ -116,7 +116,7 @@ export class CytoscapeGraph {
         };
     }
 
-    render(graph, onNodeDoubleClick) {
+    render(graph, onNodeDoubleClick, onEdgeDoubleClick) {
 
         this.clear();
         const elements = [];
@@ -150,7 +150,8 @@ export class CytoscapeGraph {
                     source: sourceId,
                     target: targetId,
                     property: edge.property,
-                    propertyName: edge.propertyName || ''
+                    propertyName: edge.propertyName || '',
+                    lineSegmentCount: edge.lineSegmentCount || 0
                 }
             });
         });
@@ -179,7 +180,12 @@ export class CytoscapeGraph {
                     style: {
                         'width': 1,
                         'line-color': '#999',
-                        'curve-style': 'straight'
+                        'curve-style': 'straight',
+                        'label': 'data(propertyName)',
+                        'color': '#333',
+                        'font-size': '9px',
+                        'text-rotation': 'autorotate',
+                        'text-margin-y': -8,
                     }
                 }
             ],
@@ -187,13 +193,13 @@ export class CytoscapeGraph {
             layout: {
                 name: 'cose',
                 animate: false,
-                fit: true,
+                fit: false,
                 padding: 40,
                 numIter: 100,
                 idealEdgeLength: 30,
-                nodeRepulsion: 500,
+                nodeRepulsion: 50,
                 edgeElasticity: 0.45,
-                gravity: 0.25
+                gravity: 0.15
             },
 
             minZoom: 0.1,
@@ -212,6 +218,7 @@ export class CytoscapeGraph {
                 node.lock();
             }
         });
+        this.cy.fit(this.cy.nodes(), 40);
 
         // PRIKAZ TIPA ČVORA KADA SE PREĐE MIŠEM
 
@@ -225,6 +232,17 @@ export class CytoscapeGraph {
             });
         });
 
+        // PRIKAZ BROJA VEZA KADA SE PREĐE MIŠEM
+
+        this.cy.edges().forEach(edge => {
+            edge.on('mouseover', () => {
+                const count = edge.data('lineSegmentCount') || 0;
+                this.container.title = `${count} ACLineSegment${count === 1 ? '' : '-a'}`;
+            });
+
+            edge.on('mouseout', () => { this.container.title = ''; });
+        });
+
         // DVOKLIK NA ČVOR
 
         this.cy.nodes().forEach(node => {
@@ -235,6 +253,22 @@ export class CytoscapeGraph {
                         id: node.id(),
                         name: node.data('name'),
                         type: node.data('type')
+                    });
+                }
+            });
+        });
+
+        // DVOKLIK NA VEZU
+
+        this.cy.edges().forEach(edge => {
+
+            edge.on('dblclick', () => {
+
+                if (onEdgeDoubleClick) {
+                    onEdgeDoubleClick({
+                        id: edge.id(),
+                        source: edge.source().id(),
+                        target: edge.target().id()
                     });
                 }
             });

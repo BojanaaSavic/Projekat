@@ -91,7 +91,13 @@ export class G6Graph {
             style: {
                 stroke: '#999',
                 lineWidth: nodeCount > 2000 ? 1 : 1.5,
-                endArrow: nodeCount <= 2000
+                endArrow: nodeCount <= 2000,
+                labelText: edge => edge.data?.showLabel ? edge.data?.propertyName || '' : '',
+                labelFill: '#555',
+                labelFontSize: 11,
+                labelOffsetY: -8,
+                labelBackgroundFill: '#fff',
+                labelBackgroundOpacity: 0.8
             }
         };
     }
@@ -110,9 +116,9 @@ export class G6Graph {
         };
     }
 
-    render(graph, onNodeDoubleClick) {
+    async render(graph, onNodeDoubleClick, onEdgeDoubleClick) {
 
-        this.clear();
+        await this.clear();
 
         const width = this.container.clientWidth || 1000;
         const height = 650;
@@ -132,12 +138,21 @@ export class G6Graph {
                     ...(position ? { style: { x: position.x, y: position.y } } : {})
                 };
             }),
-            edges: graph.edges.map(edge => ({
+            edges: graph.edges.map(edge => {
 
-                id: edge.id,
-                source: this.getNodeId(edge.source),
-                target: this.getNodeId(edge.target)
-            }))
+                const targetNode = graph.nodes.find(node => node.id === this.getNodeId(edge.target));
+
+                return {
+                    id: edge.id,
+                    source: this.getNodeId(edge.source),
+                    target: this.getNodeId(edge.target),
+                    data: {
+                        propertyName: edge.propertyName || '',
+                        lineSegmentCount: edge.lineSegmentCount || 0,
+                        showLabel: targetNode?.type === 'ACLineSegment'
+                    }
+                };
+            })
         };
 
         this.graph = new G6.Graph({
@@ -155,29 +170,68 @@ export class G6Graph {
                 'drag-element',
                 'zoom-canvas',
                 'drag-canvas'
+            ],
+            plugins: [
+                {
+                    type: 'tooltip',
+                    getContent: (event, items) => {
+                        const item = items[0];
+
+                        if (event.targetType === 'edge') {
+                            const count = item.data?.lineSegmentCount || 0;
+                            return `${count} ACLineSegment${count === 1 ? '' : '-a'}`;
+                        }
+
+                        if (event.targetType === 'node') {
+                            return item.data?.type || '';
+                        }
+                        return '';
+                    }
+                }
             ]
         });
 
-        // DVOKLIK NA ČVOR
+        // DVOKLIK 
 
         this.graph.on('node:dblclick', event => {
 
-            const node = event.item;
-
-            if (!node || !onNodeDoubleClick) {
+            if (!onNodeDoubleClick) {
                 return;
             }
 
-            const nodeData = node.getData();
+            const nodeData = this.graph.getNodeData(event.target.id);
+
+            if (!nodeData) {
+                return;
+            }
 
             onNodeDoubleClick({
                 id: nodeData.id,
-                name: nodeData.data.name,
-                type: nodeData.data.type
+                name: nodeData.data?.name,
+                type: nodeData.data?.type
             });
         });
 
-        this.graph.render();
+        this.graph.on('edge:dblclick', event => {
+
+            if (!onEdgeDoubleClick) {
+                return;
+            }
+
+            const edgeData = this.graph.getEdgeData(event.target.id);
+
+            if (!edgeData) {
+                return;
+            }
+
+            onEdgeDoubleClick({
+                id: edgeData.id,
+                source: edgeData.source,
+                target: edgeData.target
+            });
+        });
+
+        await this.graph.render();
     }
 
     async exportPNG() {
@@ -302,7 +356,7 @@ export class G6Graph {
 
     async renderForBenchmark(graph) {
 
-        this.clear();
+        await this.clear();
 
         const width = this.container.clientWidth || 1000;
         const height = 650;
@@ -324,7 +378,7 @@ export class G6Graph {
         const renderEnd = performance.now();
         const layoutStart = performance.now();
 
-        this.graph.render();
+        await this.graph.render();
 
         await new Promise(resolve => {
             requestAnimationFrame(() => {
@@ -341,12 +395,14 @@ export class G6Graph {
         };
     }
 
-    clear() {
-
+    async clear() {
         if (this.graph) {
-            this.graph.destroy();
+            const graph = this.graph;
             this.graph = null;
+
+            await graph.clear();
         }
+
         this.container.innerHTML = '';
     }
 }

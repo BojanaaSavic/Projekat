@@ -296,6 +296,22 @@ const server = http.createServer(async (request, response) => {
                     graph = await app.graph.getNetworkGraph();
                 }
 
+                else if (type === 'line-connection') {
+
+                    const station1 = url.searchParams.get('station1');
+                    const station2 = url.searchParams.get('station2');
+
+                    if (!station1 || !station2) {
+
+                        response.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+                        response.end(JSON.stringify({ error: 'Obje stanice su obavezne.' }));
+
+                        return;
+                    }
+
+                    graph = await app.graph.getLineConnectionGraph(station1, station2);
+                }
+
                 else if (type === 'node') {
 
                     const nodeUri = url.searchParams.get('node');

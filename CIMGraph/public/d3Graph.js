@@ -20,7 +20,7 @@ export class D3Graph {
     }
 
 
-    render(graph, onNodeDoubleClick) {
+    render(graph, onNodeDoubleClick, onEdgeDoubleClick) {
 
         this.clear();
 
@@ -53,7 +53,17 @@ export class D3Graph {
             .attr('class', 'graph-link')
             .attr('stroke', '#999')
             .attr('stroke-opacity', 0.6)
-            .attr('stroke-width', 1.5);
+            .attr('stroke-width', 1.5)
+            .on('dblclick', (event, d) => {
+                if (onEdgeDoubleClick) {
+                    onEdgeDoubleClick(d);
+                }
+            });
+        link.append('title')
+            .text(d => {
+                const count = d.lineSegmentCount || 0;
+                return `${count} ACLineSegment${count === 1 ? '' : '-a'}`;
+            });
         link.append('text').attr('class', 'edge-label').text(d => d.propertyName || '');
 
         const node = nodesLayer.selectAll('g').data(graph.nodes).enter().append('g').attr('class', 'graph-node');

@@ -30,7 +30,7 @@ export class SigmaGraph {
         this.isDragging = false;
     }
 
-    render(graph, onNodeDoubleClick) {
+    render(graph, onNodeDoubleClick, onEdgeDoubleClick) {
 
         this.clear();
         this.graph = new Graph();
@@ -62,7 +62,8 @@ export class SigmaGraph {
                 {
                     label: edge.propertyName || '',
                     size: 1,
-                    color: '#999'
+                    color: '#999',
+                    lineSegmentCount: edge.lineSegmentCount || 0
                 }
             );
         });
@@ -92,16 +93,18 @@ export class SigmaGraph {
 
         this.renderer = new Sigma(this.graph, this.container,
             {
-                settings: {
+                    enableEdgeEvents: true,
+                    renderLabels: true,
+                    renderEdgeLabels: true,
                     autoRescale: 'once',
                     minCameraRatio: 0.1,
                     maxCameraRatio: 5,
-                    renderLabels: true,
                     labelFont: 'Arial',
                     labelSize: 12,
+                    edgeLabelFont: 'Arial',
+                    edgeLabelSize: 11,
                     defaultNodeColor: '#4f81bd',
                     defaultEdgeColor: '#999'
-                }
             }
         );
 
@@ -153,10 +156,34 @@ export class SigmaGraph {
             }
         });
 
+        // DVOKLIK NA VEZU
+
+        this.renderer.on('doubleClickEdge', ({ edge }) => {
+
+            const source = this.graph.source(edge);
+            const target = this.graph.target(edge);
+
+            if (onEdgeDoubleClick) {
+
+                onEdgeDoubleClick({
+                    id: edge,
+                    source,
+                    target
+                });
+            }
+        });
+
+        this.renderer.on('enterEdge', ({ edge }) => {
+
+            const count = this.graph.getEdgeAttribute(edge, 'lineSegmentCount') || 0;
+            this.container.title = `${count} ACLineSegment${count === 1 ? '' : '-a'}`;
+        });
+
+        this.renderer.on('leaveEdge', () => { this.container.title = ''; });
+
         this.renderer.on('enterNode', ({ node }) => {
                 const name = this.graph.getNodeAttribute(node, 'label');
                 const type = this.graph.getNodeAttribute(node, 'cimType');
-
                 this.container.title = type ? `${name}\nTip: ${type}` : name;
             }
         );
@@ -280,6 +307,14 @@ export class SigmaGraph {
                         stroke="#999"
                         stroke-width="1"
                     />
+                    <text
+                        x="${(sourcePosition.x + targetPosition.x) / 2}"
+                        y="${(sourcePosition.y + targetPosition.y) / 2 - 5}"
+                        font-family="Arial"
+                        font-size="11"
+                        fill="#222"
+                        text-anchor="middle"
+                    >${escapeXml(attributes.label || '')}</text>
                 `;
             }
         );

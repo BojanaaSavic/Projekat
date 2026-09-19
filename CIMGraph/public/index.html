@@ -378,7 +378,7 @@ async function loadGraph(url, title, graphType = null) {
         currentGraph = graph;
         graph.graphType = graphType;
 
-        backToNetworkButton.classList.toggle('hidden', graphType !== 'substation' && graphType !== 'node');
+        backToNetworkButton.classList.toggle('hidden', graphType !== 'substation' && graphType !== 'node' && graphType !== 'lineConnection');
         sparqlQuery.textContent = graph.query || '';
         querySection.classList.remove('hidden');
 
@@ -387,7 +387,7 @@ async function loadGraph(url, title, graphType = null) {
         graphTitle.textContent = title;
         graphSection.classList.remove('hidden');
 
-        renderCurrentGraph();
+        await renderCurrentGraph();
         exportControls.classList.remove('hidden');
 
         status.textContent = `Graf učitan: ${graph.nodes.length} čvorova i ${graph.edges.length} veza.`;
@@ -462,7 +462,31 @@ async function handleNodeDoubleClick(node) {
     );
 }
 
-function renderCurrentGraph() {
+async function handleEdgeDoubleClick(edge) {
+
+    if (!edge || !edge.source || !edge.target) {
+        return;
+    }
+
+    if (currentGraph?.graphType !== 'network') {
+        return;
+    }
+
+    const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
+    const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
+    const sourceNode = currentGraph.nodes.find(node => node.id === sourceId);
+    const targetNode = currentGraph.nodes.find(node => node.id === targetId);
+    const sourceName = sourceNode?.name || sourceId;
+    const targetName = targetNode?.name || targetId;
+
+    await loadGraph(
+        `/api/graph?type=line-connection&station1=${encodeURIComponent(sourceId)}&station2=${encodeURIComponent(targetId)}`,
+        `Mrežna veza: ${sourceName} ↔ ${targetName}`,
+        'lineConnection'
+    );
+}
+
+async function renderCurrentGraph() {
 
     if (!currentGraph) {
         return;
@@ -476,16 +500,14 @@ function renderCurrentGraph() {
         return;
     }
 
-    Object.values(graphRenderers).forEach(
-        currentRenderer => {
-            if (currentRenderer !== renderer) {
-                currentRenderer.clear();
-            }
+    for (const currentRenderer of Object.values(graphRenderers)) {
 
+        if (currentRenderer !== renderer) {
+            await currentRenderer.clear();
         }
-    );
+    }
 
-    renderer.render(currentGraph, handleNodeDoubleClick);
+    await renderer.render(currentGraph, handleNodeDoubleClick, handleEdgeDoubleClick);
 }
 
 exportButton.addEventListener('click', () => {
