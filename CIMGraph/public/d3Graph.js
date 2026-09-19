@@ -95,6 +95,18 @@ export class D3Graph {
                 })
         );
 
+        const fixedPositions = graph.fixedPositions || {};
+
+        graph.nodes.forEach(node => {
+
+            const position = fixedPositions[node.id];
+
+            if (position) {
+                node.fx = position.x;
+                node.fy = position.y;
+            }
+        });
+
         this.simulation = d3.forceSimulation(graph.nodes).force('link', d3.forceLink(graph.edges).id(d => d.id).distance(120))
             .force('charge', d3.forceManyBody().strength(-300))
             .force('center', d3.forceCenter(this.width / 2, this.height / 2))

@@ -124,12 +124,16 @@ export class CytoscapeGraph {
         // ČVOROVI
 
         graph.nodes.forEach(node => {
+
+            const position = graph.fixedPositions?.[node.id];
+
             elements.push({
                 data: {
                     id: node.id,
                     name: node.name,
                     type: node.type || ''
-                }
+                },
+                ...(position ? { position } : {})
             });
         });
 
@@ -197,6 +201,16 @@ export class CytoscapeGraph {
 
             wheelSensitivity: 0.2
 
+        });
+
+        Object.keys(graph.fixedPositions || {}).forEach(id => {
+
+            const node = this.cy.getElementById(id);
+
+            if (node.length) {
+                node.position(graph.fixedPositions[id]);
+                node.lock();
+            }
         });
 
         // PRIKAZ TIPA ČVORA KADA SE PREĐE MIŠEM

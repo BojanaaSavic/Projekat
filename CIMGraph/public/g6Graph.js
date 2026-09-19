@@ -116,15 +116,22 @@ export class G6Graph {
 
         const width = this.container.clientWidth || 1000;
         const height = 650;
+        const fixedPositions = graph.fixedPositions || {};
 
         const data = {
-            nodes: graph.nodes.map(node => ({
-                id: node.id,
-                data: {
-                    name: node.name,
-                    type: node.type || ''
-                }
-            })),
+            nodes: graph.nodes.map(node => {
+
+                const position = fixedPositions[node.id];
+
+                return {
+                    id: node.id,
+                    data: {
+                        name: node.name,
+                        type: node.type || ''
+                    },
+                    ...(position ? { style: { x: position.x, y: position.y } } : {})
+                };
+            }),
             edges: graph.edges.map(edge => ({
 
                 id: edge.id,

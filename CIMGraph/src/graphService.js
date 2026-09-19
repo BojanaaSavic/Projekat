@@ -300,7 +300,9 @@ export class GraphService {
             }
         });
 
-        return this.createGraph(nodes, edges, terminalQuery);
+        const fixedPositions = this.getFixedNodePositions(Array.from(nodes.values()));
+
+        return this.createGraph(nodes, edges, terminalQuery, fixedPositions);
     }
 
     async getSubstationGraph(substationUri) {
@@ -567,6 +569,26 @@ export class GraphService {
             edge.equipment.push(equipment);
             edge.equipmentCount = edge.equipment.length;
         }
+    }
+
+    getFixedNodePositions(nodes, fixedType = 'Substation') {
+        const fixedNodes = nodes
+            .filter(node => node.type === fixedType)
+            .sort((a, b) => a.id.localeCompare(b.id));
+
+        const positions = {};
+        const radius = 300;
+
+        fixedNodes.forEach((node, index) => {
+            const angle = (2 * Math.PI * index) / fixedNodes.length;
+
+            positions[node.id] = {
+                x: radius * Math.cos(angle),
+                y: radius * Math.sin(angle)
+            };
+        });
+
+        return positions;
     }
 
     createGraph(nodes, edges, query = '') {

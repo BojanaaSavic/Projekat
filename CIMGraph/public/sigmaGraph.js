@@ -67,9 +67,14 @@ export class SigmaGraph {
             );
         });
 
+        const fixedPositions = graph.fixedPositions || {};
+
         this.graph.forEachNode(node => {
-            this.graph.setNodeAttribute(node, 'x', Math.random());
-            this.graph.setNodeAttribute(node, 'y', Math.random());
+
+            const position = fixedPositions[node];
+
+            this.graph.setNodeAttribute(node, 'x', position ? position.x : Math.random());
+            this.graph.setNodeAttribute(node, 'y', position ? position.y : Math.random());
         });
 
         forceAtlas2.assign(this.graph,
