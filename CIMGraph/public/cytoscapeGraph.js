@@ -156,6 +156,8 @@ export class CytoscapeGraph {
             });
         });
 
+        const isLargeGraph = graph.nodes.length > 1000;
+
         this.cy = cytoscape({
             
             container: this.container,
@@ -195,9 +197,9 @@ export class CytoscapeGraph {
                 animate: false,
                 fit: false,
                 padding: 40,
-                numIter: 100,
-                idealEdgeLength: 30,
-                nodeRepulsion: 50,
+                numIter: isLargeGraph ? 25 : 100,
+                idealEdgeLength: isLargeGraph ? 30 : 30,
+                nodeRepulsion: isLargeGraph ? 50 : 50,
                 edgeElasticity: 0.45,
                 gravity: 0.15
             },
@@ -205,7 +207,12 @@ export class CytoscapeGraph {
             minZoom: 0.1,
             maxZoom: 5,
 
-            wheelSensitivity: 0.2
+            wheelSensitivity: 0.2,
+
+            hideEdgesOnViewport: isLargeGraph,
+            textureOnViewport: isLargeGraph,
+            motionBlur: false,
+            pixelRatio: 1
 
         });
 

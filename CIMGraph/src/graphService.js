@@ -213,88 +213,150 @@ export class GraphService {
 
     async getNetworkGraph() {
 
-        const query = ` SELECT DISTINCT ?station1 ?station1Name ?station2 ?station2Name ?line ?lineName
-
+        const nodeStationQuery = `
+            SELECT DISTINCT ?connectivityNode ?station ?stationName
             WHERE {
+                ?connectivityNode <${CIM}ConnectivityNode.ConnectivityNodeContainer> ?voltageLevel .
 
-                ?line a <${CIM}ACLineSegment> .
+                ?voltageLevel <${CIM}VoltageLevel.Substation> ?station .
 
-                ?terminal1 a <${CIM}Terminal> ;
-                    <${CIM}Terminal.ConductingEquipment> ?line ;
-                    <${CIM}Terminal.ConnectivityNode> ?connectivityNode1 .
-
-                ?terminal2 a <${CIM}Terminal> ;
-                    <${CIM}Terminal.ConductingEquipment> ?line ;
-                    <${CIM}Terminal.ConnectivityNode> ?connectivityNode2 .
-
-                FILTER (?terminal1 != ?terminal2)
-                FILTER (?connectivityNode1 != ?connectivityNode2)
-
-                ?connectivityNode1 <${CIM}ConnectivityNode.ConnectivityNodeContainer> ?voltageLevel1 .
-                ?connectivityNode2 <${CIM}ConnectivityNode.ConnectivityNodeContainer> ?voltageLevel2 .
-                ?voltageLevel1 <${CIM}VoltageLevel.Substation> ?station1 .
-                ?voltageLevel2 <${CIM}VoltageLevel.Substation> ?station2 .
-
-                FILTER (?station1 != ?station2)
-
-                OPTIONAL { ?station1 <${CIM}IdentifiedObject.name> ?station1Name . }
-                OPTIONAL { ?station2 <${CIM}IdentifiedObject.name> ?station2Name . }
-                OPTIONAL { ?line <${CIM}IdentifiedObject.name> ?lineName . }
+                OPTIONAL {
+                    ?station <${CIM}IdentifiedObject.name> ?stationName .
+                }
             }
-
-            ORDER BY ?station1Name ?station2Name ?lineName
         `;
 
-        const results = await this.sparql.query(query);
+        const nodeStationResults =
+            await this.sparql.query(nodeStationQuery);
 
+        const nodeToStation = new Map();
+        const stationNames = new Map();
+
+        nodeStationResults.forEach(binding => {
+
+            const connectivityNode =
+                binding.get('connectivityNode')?.value;
+
+            const station =
+                binding.get('station')?.value;
+
+            const stationName =
+                binding.get('stationName')?.value;
+
+            if (!connectivityNode || !station) return;
+
+            nodeToStation.set(connectivityNode, station);
+
+            if (!stationNames.has(station)) {
+                stationNames.set(
+                    station,
+                    stationName || this.getLocalName(station)
+                );
+            }
+        });
+
+
+        // 2. ACLineSegment -> ConnectivityNode
+        const terminalQuery = `
+            SELECT DISTINCT ?equipment ?equipmentName ?connectivityNode
+            WHERE {
+                ?terminal a <${CIM}Terminal> ;
+                    <${CIM}Terminal.ConductingEquipment> ?equipment ;
+                    <${CIM}Terminal.ConnectivityNode> ?connectivityNode .
+
+                ?equipment a <${CIM}ACLineSegment> .
+
+                OPTIONAL {
+                    ?equipment <${CIM}IdentifiedObject.name> ?equipmentName .
+                }
+            }
+        `;
+
+        const terminalResults =
+            await this.sparql.query(terminalQuery);
+
+        const equipmentStations = new Map();
+        const equipmentNames = new Map();
+
+        terminalResults.forEach(binding => {
+
+            const equipment =
+                binding.get('equipment')?.value;
+
+            const equipmentName =
+                binding.get('equipmentName')?.value;
+
+            const connectivityNode =
+                binding.get('connectivityNode')?.value;
+
+            if (!equipment || !connectivityNode) return;
+
+            const station =
+                nodeToStation.get(connectivityNode);
+
+            if (!station) return;
+
+            if (!equipmentStations.has(equipment)) {
+                equipmentStations.set(equipment, new Set());
+            }
+
+            equipmentStations.get(equipment).add(station);
+
+            if (!equipmentNames.has(equipment)) {
+                equipmentNames.set(
+                    equipment,
+                    equipmentName || this.getLocalName(equipment)
+                );
+            }
+        });
+
+
+        // 3. Kreiranje Substation čvorova
         const nodes = new Map();
         const edges = new Map();
 
-        results.forEach(binding => {
-
-            const station1 = binding.get('station1')?.value;
-            const station1Name = binding.get('station1Name')?.value;
-
-            const station2 = binding.get('station2')?.value;
-            const station2Name = binding.get('station2Name')?.value;
-
-            const line = binding.get('line')?.value;
-            const lineName = binding.get('lineName')?.value;
-
-            if (!station1 || !station2 || !line) {
-                return;
-            }
+        stationNames.forEach((name, station) => {
 
             this.addNode(
                 nodes,
-                station1,
-                station1Name || this.getLocalName(station1),
+                station,
+                name,
                 'Substation'
-            );
-
-            this.addNode(
-                nodes,
-                station2,
-                station2Name || this.getLocalName(station2),
-                'Substation'
-            );
-
-            this.addNetworkEdge(
-                edges,
-                station1,
-                station2,
-                line,
-                lineName || this.getLocalName(line)
             );
         });
 
+
+        // 4. Kreiranje veza između stanica
+        //    preko ACLineSegment objekata
+        equipmentStations.forEach((stations, equipment) => {
+
+            const stationList =
+                Array.from(stations);
+
+            for (let i = 0; i < stationList.length; i++) {
+
+                for (let j = i + 1; j < stationList.length; j++) {
+
+                    this.addNetworkEdge(
+                        edges,
+                        stationList[i],
+                        stationList[j],
+                        equipment,
+                        equipmentNames.get(equipment)
+                    );
+                }
+            }
+        });
+
         const fixedPositions =
-            this.getFixedNodePositions(Array.from(nodes.values()));
+            this.getFixedNodePositions(
+                Array.from(nodes.values())
+            );
 
         return this.createGraph(
             nodes,
             edges,
-            query,
+            terminalQuery,
             fixedPositions
         );
     }

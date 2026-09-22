@@ -123,7 +123,11 @@ export class G6Graph {
         const width = this.container.clientWidth || 1000;
         const height = 650;
         const fixedPositions = graph.fixedPositions || {};
+        const isLargeGraph = graph.nodes.length > 1000;
 
+        const nodeById = new Map(
+            graph.nodes.map(node => [node.id, node])
+        );
         const data = {
             nodes: graph.nodes.map(node => {
 
@@ -140,16 +144,20 @@ export class G6Graph {
             }),
             edges: graph.edges.map(edge => {
 
-                const targetNode = graph.nodes.find(node => node.id === this.getNodeId(edge.target));
+                const sourceId = this.getNodeId(edge.source);
+                const targetId = this.getNodeId(edge.target);
 
+                const targetNode = nodeById.get(targetId);
                 return {
                     id: edge.id,
-                    source: this.getNodeId(edge.source),
-                    target: this.getNodeId(edge.target),
+                    source: sourceId,
+                    target: targetId,
                     data: {
                         propertyName: edge.propertyName || '',
                         lineSegmentCount: edge.lineSegmentCount || 0,
-                        showLabel: targetNode?.type === 'ACLineSegment'
+                        showLabel:
+                            !isLargeGraph &&
+                            targetNode?.type === 'ACLineSegment'
                     }
                 };
             })

@@ -78,12 +78,14 @@ export class SigmaGraph {
             this.graph.setNodeAttribute(node, 'y', position ? position.y : Math.random());
         });
 
+        const isLargeGraph = graph.nodes.length > 1000;
+
         forceAtlas2.assign(this.graph,
             {
-                iterations: 100,
+                iterations: isLargeGraph ? 50 : 100,
                 settings: {
                     gravity: 1,
-                    scalingRatio: 10,
+                    scalingRatio: isLargeGraph ? 5 : 10,
                     strongGravityMode: true,
                     slowDown: 1,
                     barnesHutOptimize: true
@@ -93,18 +95,18 @@ export class SigmaGraph {
 
         this.renderer = new Sigma(this.graph, this.container,
             {
-                    enableEdgeEvents: true,
-                    renderLabels: true,
-                    renderEdgeLabels: true,
-                    autoRescale: 'once',
-                    minCameraRatio: 0.1,
-                    maxCameraRatio: 5,
-                    labelFont: 'Arial',
-                    labelSize: 12,
-                    edgeLabelFont: 'Arial',
-                    edgeLabelSize: 11,
-                    defaultNodeColor: '#4f81bd',
-                    defaultEdgeColor: '#999'
+                enableEdgeEvents: !isLargeGraph,
+                renderLabels: !isLargeGraph,
+                renderEdgeLabels: !isLargeGraph,
+                autoRescale: 'once',
+                minCameraRatio: 0.1,
+                maxCameraRatio: 5,
+                labelFont: 'Arial',
+                labelSize: 12,
+                edgeLabelFont: 'Arial',
+                edgeLabelSize: 11,
+                defaultNodeColor: '#4f81bd',
+                defaultEdgeColor: '#999'
             }
         );
 

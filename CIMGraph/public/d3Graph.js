@@ -48,6 +48,7 @@ export class D3Graph {
         const linksLayer = zoomLayer.append('g').attr('class', 'links');
         const nodesLayer = zoomLayer.append('g').attr('class', 'nodes');
         const link = linksLayer.selectAll('g').data(graph.edges).enter().append('g').attr('class', 'graph-edge');
+        const isLargeGraph = graph.nodes.length > 1000;
 
         link.append('line')
             .attr('class', 'graph-link')
@@ -59,24 +60,36 @@ export class D3Graph {
                     onEdgeDoubleClick(d);
                 }
             });
-        link.append('title')
-            .text(d => {
-                const count = d.lineSegmentCount || 0;
-                return `${count} ACLineSegment${count === 1 ? '' : '-a'}`;
-            });
-        link.append('text').attr('class', 'edge-label').text(d => d.propertyName || '');
+        if (!isLargeGraph) {
+            link.append('title')
+                .text(d => {
+                    const count = d.lineSegmentCount || 0;
+                    return `${count} ACLineSegment${count === 1 ? '' : '-a'}`;
+                });
 
+            link.append('text')
+                .attr('class', 'edge-label')
+                .text(d => d.propertyName || '');
+        }
         const node = nodesLayer.selectAll('g').data(graph.nodes).enter().append('g').attr('class', 'graph-node');
 
         node.append('circle').attr('r', 9).attr('fill', '#4f81bd');;
-        node.append('text').text(d => d.name).attr('dx', 13).attr('dy', 4).attr('fill', '#222');;
-        node.append('title').text(d => {
-                if (d.type) {
-                    return `${d.name}\nTip: ${d.type}`;
-                }
+        if (!isLargeGraph) {
+            node.append('text')
+                .text(d => d.name)
+                .attr('dx', 13)
+                .attr('dy', 4)
+                .attr('fill', '#222');
 
-                return d.name;
-            });
+            node.append('title')
+                .text(d => {
+                    if (d.type) {
+                        return `${d.name}\nTip: ${d.type}`;
+                    }
+
+                    return d.name;
+                });
+        }
         node.on('dblclick', (event, d) => {
                 if (onNodeDoubleClick) {
                     onNodeDoubleClick(d);
@@ -117,11 +130,28 @@ export class D3Graph {
             }
         });
 
-        this.simulation = d3.forceSimulation(graph.nodes).force('link', d3.forceLink(graph.edges).id(d => d.id).distance(120))
-            .force('charge', d3.forceManyBody().strength(-300))
-            .force('center', d3.forceCenter(this.width / 2, this.height / 2))
-            .force('collision', d3.forceCollide().radius(25));
-
+        this.simulation = d3.forceSimulation(graph.nodes)
+            .alphaDecay(isLargeGraph ? 0.08 : 0.022)
+            .force(
+                'link',
+                d3.forceLink(graph.edges)
+                    .id(d => d.id)
+                    .distance(isLargeGraph ? 60 : 120)
+            )
+            .force(
+                'charge',
+                d3.forceManyBody()
+                    .strength(isLargeGraph ? -100 : -300)
+            )
+            .force(
+                'center',
+                d3.forceCenter(this.width / 2, this.height / 2)
+            )
+            .force(
+                'collision',
+                d3.forceCollide()
+                    .radius(isLargeGraph ? 12 : 25)
+            );
         this.simulation.on('tick', () => {
             link.select('line').attr('x1', d => d.source.x)
                 .attr('y1', d => d.source.y)
