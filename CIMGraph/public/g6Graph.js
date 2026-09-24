@@ -155,9 +155,7 @@ export class G6Graph {
                     data: {
                         propertyName: edge.propertyName || '',
                         lineSegmentCount: edge.lineSegmentCount || 0,
-                        showLabel:
-                            !isLargeGraph &&
-                            targetNode?.type === 'ACLineSegment'
+                        showLabel: !isLargeGraph && targetNode?.type === 'ACLineSegment'
                     }
                 };
             })
@@ -379,7 +377,14 @@ export class G6Graph {
                 autoFit: 'view',
                 data,
                 node: this.getNodeStyle(graph.nodes.length),
-                edge: this.getEdgeStyle(graph.nodes.length),
+                edge: {
+                    type: 'line',
+                    style: {
+                        stroke: '#999',
+                        lineWidth: graph.nodes.length > 2000 ? 1 : 1.5,
+                        endArrow: graph.nodes.length <= 2000
+                    }
+                },
                 layout: this.getLayout(graph.nodes.length)
             });
 
@@ -396,10 +401,24 @@ export class G6Graph {
 
         const layoutEnd = performance.now();
 
+        const positions = this.graph.getNodeData().map(node => {
+
+            const [x, y] = this.graph.getElementPosition(node.id);
+
+            return {
+                nodeId: node.id,
+                nodeName: node.data?.name || node.id,
+                x,
+                y
+            };
+
+        });
+
         return {
             layoutTime: layoutEnd - layoutStart,
             renderTime: renderEnd - renderStart,
-            totalTime: layoutEnd - totalStart
+            totalTime: layoutEnd - totalStart,
+            positions: positions
         };
     }
 

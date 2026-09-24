@@ -431,10 +431,24 @@ export class SigmaGraph {
 
         const rendererEnd = performance.now();
 
+        const positions = [];
+
+        this.graph.forEachNode((node, attributes) => {
+
+            positions.push({
+                nodeId: node,
+                nodeName: attributes.label || node,
+                x: attributes.x,
+                y: attributes.y
+            });
+
+        });
+
         return {
             layoutTime: layoutEnd - layoutStart,
             renderTime: rendererEnd - rendererStart,
-            totalTime: rendererEnd - totalStart
+            totalTime: rendererEnd - totalStart,
+            positions: positions
         };
     }
 

@@ -1,6 +1,6 @@
 const RDF = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
 const RDFS = 'http://www.w3.org/2000/01/rdf-schema#';
-const CIM = 'http://iec.ch/TC57/CIM100#';
+const CIM = 'cim:';
 
 export class GraphService {
 
@@ -27,7 +27,9 @@ export class GraphService {
         const instanceLimit = Number.isInteger(limit) && limit > 0 ? limit : null;
         const relationLimit = instanceLimit ? Math.max(1, Math.floor(instanceLimit * 0.4)) : null;
 
-        const query = `SELECT DISTINCT ?instance ?instanceName ?relation ?target ?targetName ?targetType
+        const query = `
+        PREFIX cim: <http://iec.ch/TC57/CIM100#>
+        SELECT DISTINCT ?instance ?instanceName ?relation ?target ?targetName ?targetType
             WHERE {
 
                 {
@@ -51,18 +53,9 @@ export class GraphService {
                     ${relationLimit ? `LIMIT ${relationLimit}` : ''}
                 }
 
-                OPTIONAL {
-                    ?instance <${CIM}IdentifiedObject.name> ?instanceName .
-                }
-
-                OPTIONAL {
-                    ?target <${CIM}IdentifiedObject.name> ?targetName .
-                }
-
-                OPTIONAL {
-                    ?target a ?targetType .
-                }
-
+                OPTIONAL { ?instance cim:IdentifiedObject.name ?instanceName . }
+                OPTIONAL { ?target cim:IdentifiedObject.name ?targetName . }
+                OPTIONAL { ?target a ?targetType . }
             }
         `;
 
@@ -105,15 +98,17 @@ export class GraphService {
             };
         }
 
-        const query = `SELECT DISTINCT ?equipment ?equipmentName ?equipmentType
+        const query = `
+        PREFIX cim: <http://iec.ch/TC57/CIM100#>
+        SELECT DISTINCT ?equipment ?equipmentName ?equipmentType
             WHERE {
                 ?equipment a ?equipmentType .
 
                 ?equipmentType <${RDFS}subClassOf>* <${CIM}Equipment> .
 
-                ?equipment <${CIM}Equipment.EquipmentContainer> <${nodeUri}> .
+                ?equipment cim:Equipment.EquipmentContainer <${nodeUri}> .
 
-                OPTIONAL { ?equipment <${CIM}IdentifiedObject.name> ?equipmentName . }
+                OPTIONAL { ?equipment cim:IdentifiedObject.name ?equipmentName . }
             }
             ORDER BY ?equipmentName
         `;
@@ -159,7 +154,9 @@ export class GraphService {
         }
 
         const containerFilter = containerUri ? `FILTER (?container = <${containerUri}>)` : '';
-        const query = ` SELECT DISTINCT ?container ?containerName ?equipment ?equipmentName ?equipmentType
+        const query = `
+            PREFIX cim: <http://iec.ch/TC57/CIM100#>
+            SELECT DISTINCT ?container ?containerName ?equipment ?equipmentName ?equipmentType
             WHERE {
                 ?container a <${containerTypeUri}> .
 
@@ -169,11 +166,11 @@ export class GraphService {
 
                 ?equipmentType <${RDFS}subClassOf>* <${CIM}Equipment> .
 
-                ?equipment <${CIM}Equipment.EquipmentContainer> ?container .
+                ?equipment cim:Equipment.EquipmentContainer ?container .
 
-                OPTIONAL { ?container <${CIM}IdentifiedObject.name> ?containerName . }
+                OPTIONAL { ?container cim:IdentifiedObject.name ?containerName . }
 
-                OPTIONAL { ?equipment <${CIM}IdentifiedObject.name> ?equipmentName . }
+                OPTIONAL { ?equipment cim:IdentifiedObject.name ?equipmentName . }
             }
             ORDER BY ?containerName ?equipmentName
         `;
@@ -214,85 +211,65 @@ export class GraphService {
     async getNetworkGraph() {
 
         const nodeStationQuery = `
+            PREFIX cim: <http://iec.ch/TC57/CIM100#>
+
             SELECT DISTINCT ?connectivityNode ?station ?stationName
             WHERE {
-                ?connectivityNode <${CIM}ConnectivityNode.ConnectivityNodeContainer> ?voltageLevel .
+                ?connectivityNode cim:ConnectivityNode.ConnectivityNodeContainer ?voltageLevel .
+                ?voltageLevel cim:VoltageLevel.Substation ?station .
 
-                ?voltageLevel <${CIM}VoltageLevel.Substation> ?station .
-
-                OPTIONAL {
-                    ?station <${CIM}IdentifiedObject.name> ?stationName .
-                }
+                OPTIONAL { ?station cim:IdentifiedObject.name ?stationName . }
             }
         `;
 
-        const nodeStationResults =
-            await this.sparql.query(nodeStationQuery);
-
+        const nodeStationResults = await this.sparql.query(nodeStationQuery);
         const nodeToStation = new Map();
         const stationNames = new Map();
 
         nodeStationResults.forEach(binding => {
 
-            const connectivityNode =
-                binding.get('connectivityNode')?.value;
-
-            const station =
-                binding.get('station')?.value;
-
-            const stationName =
-                binding.get('stationName')?.value;
+            const connectivityNode = binding.get('connectivityNode')?.value;
+            const station = binding.get('station')?.value;
+            const stationName = binding.get('stationName')?.value;
 
             if (!connectivityNode || !station) return;
 
             nodeToStation.set(connectivityNode, station);
 
             if (!stationNames.has(station)) {
-                stationNames.set(
-                    station,
-                    stationName || this.getLocalName(station)
-                );
+                stationNames.set(station, stationName || this.getLocalName(station));
             }
         });
 
 
-        // 2. ACLineSegment -> ConnectivityNode
         const terminalQuery = `
+            PREFIX cim: <http://iec.ch/TC57/CIM100#>
+
             SELECT DISTINCT ?equipment ?equipmentName ?connectivityNode
             WHERE {
-                ?terminal a <${CIM}Terminal> ;
-                    <${CIM}Terminal.ConductingEquipment> ?equipment ;
-                    <${CIM}Terminal.ConnectivityNode> ?connectivityNode .
+                ?terminal a cim:Terminal ;
+                    cim:Terminal.ConductingEquipment ?equipment ;
+                    cim:Terminal.ConnectivityNode ?connectivityNode .
 
-                ?equipment a <${CIM}ACLineSegment> .
+                ?equipment a cim:ACLineSegment .
 
-                OPTIONAL {
-                    ?equipment <${CIM}IdentifiedObject.name> ?equipmentName .
-                }
+                OPTIONAL { ?equipment cim:IdentifiedObject.name ?equipmentName . }
             }
         `;
 
-        const terminalResults =
-            await this.sparql.query(terminalQuery);
-
+        const terminalResults = await this.sparql.query(terminalQuery);
         const equipmentStations = new Map();
         const equipmentNames = new Map();
 
         terminalResults.forEach(binding => {
 
-            const equipment =
-                binding.get('equipment')?.value;
-
-            const equipmentName =
-                binding.get('equipmentName')?.value;
-
-            const connectivityNode =
-                binding.get('connectivityNode')?.value;
+            const equipment = binding.get('equipment')?.value;
+            const equipmentName = binding.get('equipmentName')?.value;
+            const connectivityNode = binding.get('connectivityNode')?.value;
 
             if (!equipment || !connectivityNode) return;
 
-            const station =
-                nodeToStation.get(connectivityNode);
+            const station = nodeToStation.get(connectivityNode);
 
             if (!station) return;
 
@@ -303,35 +280,21 @@ export class GraphService {
             equipmentStations.get(equipment).add(station);
 
             if (!equipmentNames.has(equipment)) {
-                equipmentNames.set(
-                    equipment,
-                    equipmentName || this.getLocalName(equipment)
-                );
+                equipmentNames.set(equipment, equipmentName || this.getLocalName(equipment));
             }
         });
 
-
-        // 3. Kreiranje Substation čvorova
         const nodes = new Map();
         const edges = new Map();
 
         stationNames.forEach((name, station) => {
 
-            this.addNode(
-                nodes,
-                station,
-                name,
-                'Substation'
-            );
+            this.addNode(nodes, station, name, 'Substation');
         });
 
-
-        // 4. Kreiranje veza između stanica
-        //    preko ACLineSegment objekata
         equipmentStations.forEach((stations, equipment) => {
 
-            const stationList =
-                Array.from(stations);
+            const stationList = Array.from(stations);
 
             for (let i = 0; i < stationList.length; i++) {
 
@@ -348,10 +311,7 @@ export class GraphService {
             }
         });
 
-        const fixedPositions =
-            this.getFixedNodePositions(
-                Array.from(nodes.values())
-            );
+        const fixedPositions = this.getFixedNodePositions(Array.from(nodes.values()));
 
         return this.createGraph(
             nodes,
@@ -372,7 +332,9 @@ export class GraphService {
             };
         }
 
-        const query = ` SELECT DISTINCT
+        const query = ` 
+        PREFIX cim: <http://iec.ch/TC57/CIM100#>
+        SELECT DISTINCT
                 ?equipment1
                 ?equipment1Name
                 ?equipment1Type
@@ -384,26 +346,26 @@ export class GraphService {
             WHERE {
 
                 # Prvi element preko Terminala dolazi do ConnectivityNode-a
-                ?terminal1 a <${CIM}Terminal> ;
-                    <${CIM}Terminal.ConductingEquipment> ?equipment1 ;
-                    <${CIM}Terminal.ConnectivityNode> ?connectivityNode .
+                ?terminal1 a cim:Terminal ;
+                    cim:Terminal.ConductingEquipment ?equipment1 ;
+                    cim:Terminal.ConnectivityNode ?connectivityNode .
 
                 # Drugi element je povezan na isti ConnectivityNode
-                ?terminal2 a <${CIM}Terminal> ;
-                    <${CIM}Terminal.ConductingEquipment> ?equipment2 ;
-                    <${CIM}Terminal.ConnectivityNode> ?connectivityNode .
+                ?terminal2 a cim:Terminal ;
+                    cim:Terminal.ConductingEquipment ?equipment2 ;
+                    cim:Terminal.ConnectivityNode ?connectivityNode .
 
                 FILTER (?terminal1 != ?terminal2)
                 FILTER (?equipment1 != ?equipment2)
 
                 # ConnectivityNode pripada VoltageLevel-u
-                ?connectivityNode <${CIM}ConnectivityNode.ConnectivityNodeContainer> ?voltageLevel .
+                ?connectivityNode cim:ConnectivityNode.ConnectivityNodeContainer ?voltageLevel .
 
                 # VoltageLevel pripada izabranoj stanici
-                ?voltageLevel <${CIM}VoltageLevel.Substation> <${substationUri}> .
+                ?voltageLevel cim:VoltageLevel.Substation <${substationUri}> .
 
-                OPTIONAL { ?equipment1 <${CIM}IdentifiedObject.name> ?equipment1Name . }
-                OPTIONAL { ?equipment2 <${CIM}IdentifiedObject.name> ?equipment2Name . }
+                OPTIONAL { ?equipment1 cim:IdentifiedObject.name ?equipment1Name . }
+                OPTIONAL { ?equipment2 cim:IdentifiedObject.name ?equipment2Name . }
                 OPTIONAL { ?equipment1 a ?equipment1Type . }
                 OPTIONAL { ?equipment2 a ?equipment2Type . }
             }
@@ -466,7 +428,9 @@ export class GraphService {
             };
         }
 
-        const query = ` SELECT DISTINCT
+        const query = ` 
+        PREFIX cim: <http://iec.ch/TC57/CIM100#>
+        SELECT DISTINCT
                 ?source
                 ?sourceName
                 ?sourceType
@@ -485,9 +449,9 @@ export class GraphService {
                     FILTER (isIRI(?target))
                     FILTER (?property != <${RDF}type>)
 
-                    OPTIONAL { ?source <${CIM}IdentifiedObject.name> ?sourceName . }
+                    OPTIONAL { ?source cim:IdentifiedObject.name ?sourceName . }
                     OPTIONAL { ?source a ?sourceType . }
-                    OPTIONAL { ?target <${CIM}IdentifiedObject.name> ?targetName . }
+                    OPTIONAL { ?target cim:IdentifiedObject.name ?targetName . }
                     OPTIONAL { ?target a ?targetType . }
                 }
 
@@ -501,9 +465,9 @@ export class GraphService {
                     FILTER (isIRI(?source))
                     FILTER (?property != <${RDF}type>)
 
-                    OPTIONAL { ?source <${CIM}IdentifiedObject.name> ?sourceName . }
+                    OPTIONAL { ?source cim:IdentifiedObject.name ?sourceName . }
                     OPTIONAL { ?source a ?sourceType . }
-                    OPTIONAL { ?target <${CIM}IdentifiedObject.name> ?targetName . }
+                    OPTIONAL { ?target cim:IdentifiedObject.name ?targetName . }
                     OPTIONAL { ?target a ?targetType . }
                 }
             }
@@ -564,34 +528,36 @@ export class GraphService {
             };
         }
 
-        const query = ` SELECT DISTINCT ?station1 ?station1Name ?station2 ?station2Name ?line ?lineName
+        const query = ` 
+        PREFIX cim: <http://iec.ch/TC57/CIM100#>
+        SELECT DISTINCT ?station1 ?station1Name ?station2 ?station2Name ?line ?lineName
 
             WHERE {
 
-                ?line a <${CIM}ACLineSegment> .
+                ?line a cim:ACLineSegment .
 
-                ?terminal1 a <${CIM}Terminal> ;
-                    <${CIM}Terminal.ConductingEquipment> ?line ;
-                    <${CIM}Terminal.ConnectivityNode> ?connectivityNode1 .
+                ?terminal1 a cim:Terminal ;
+                    cim:Terminal.ConductingEquipment ?line ;
+                    cim:Terminal.ConnectivityNode ?connectivityNode1 .
 
-                ?terminal2 a <${CIM}Terminal> ;
-                    <${CIM}Terminal.ConductingEquipment> ?line ;
-                    <${CIM}Terminal.ConnectivityNode> ?connectivityNode2 .
+                ?terminal2 a cim:Terminal ;
+                    cim:Terminal.ConductingEquipment ?line ;
+                    cim:Terminal.ConnectivityNode ?connectivityNode2 .
 
                 FILTER (?terminal1 != ?terminal2)
                 FILTER (?connectivityNode1 != ?connectivityNode2)
 
-                ?connectivityNode1 <${CIM}ConnectivityNode.ConnectivityNodeContainer> ?voltageLevel1 .
-                ?connectivityNode2 <${CIM}ConnectivityNode.ConnectivityNodeContainer> ?voltageLevel2 .
-                ?voltageLevel1 <${CIM}VoltageLevel.Substation> ?station1 .
-                ?voltageLevel2 <${CIM}VoltageLevel.Substation> ?station2 .
+                ?connectivityNode1 cim:ConnectivityNode.ConnectivityNodeContainer ?voltageLevel1 .
+                ?connectivityNode2 cim:ConnectivityNode.ConnectivityNodeContainer ?voltageLevel2 .
+                ?voltageLevel1 cim:VoltageLevel.Substation ?station1 .
+                ?voltageLevel2 cim:VoltageLevel.Substation ?station2 .
 
                 FILTER ((?station1 = <${station1Uri}> && ?station2 = <${station2Uri}>)
                     || (?station1 = <${station2Uri}> && ?station2 = <${station1Uri}>))
 
-                OPTIONAL { ?station1 <${CIM}IdentifiedObject.name> ?station1Name . }
-                OPTIONAL { ?station2 <${CIM}IdentifiedObject.name> ?station2Name . }
-                OPTIONAL { ?line <${CIM}IdentifiedObject.name> ?lineName . }
+                OPTIONAL { ?station1 cim:IdentifiedObject.name ?station1Name . }
+                OPTIONAL { ?station2 cim:IdentifiedObject.name ?station2Name . }
+                OPTIONAL { ?line cim:IdentifiedObject.name ?lineName . }
             }
 
             ORDER BY ?lineName

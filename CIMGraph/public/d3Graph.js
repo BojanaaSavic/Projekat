@@ -132,26 +132,10 @@ export class D3Graph {
 
         this.simulation = d3.forceSimulation(graph.nodes)
             .alphaDecay(isLargeGraph ? 0.08 : 0.022)
-            .force(
-                'link',
-                d3.forceLink(graph.edges)
-                    .id(d => d.id)
-                    .distance(isLargeGraph ? 60 : 120)
-            )
-            .force(
-                'charge',
-                d3.forceManyBody()
-                    .strength(isLargeGraph ? -100 : -300)
-            )
-            .force(
-                'center',
-                d3.forceCenter(this.width / 2, this.height / 2)
-            )
-            .force(
-                'collision',
-                d3.forceCollide()
-                    .radius(isLargeGraph ? 12 : 25)
-            );
+            .force('link', d3.forceLink(graph.edges).id(d => d.id).distance(isLargeGraph ? 60 : 120))
+            .force('charge', d3.forceManyBody().strength(isLargeGraph ? -100 : -300))
+            .force('center', d3.forceCenter(this.width / 2, this.height / 2))
+            .force('collision', d3.forceCollide().radius(isLargeGraph ? 12 : 25));
         this.simulation.on('tick', () => {
             link.select('line').attr('x1', d => d.source.x)
                 .attr('y1', d => d.source.y)
@@ -273,10 +257,18 @@ export class D3Graph {
 
         const layoutEnd = performance.now();
 
+        const positions = graph.nodes.map(node => ({
+            nodeId: node.id,
+            nodeName: node.name || node.id,
+            x: node.x,
+            y: node.y
+        }));
+
         return {
             layoutTime: layoutEnd - layoutStart,
             renderTime: renderTime,
-            totalTime: layoutEnd - renderStart
+            totalTime: layoutEnd - renderStart,
+            positions: positions
         };
     }
 

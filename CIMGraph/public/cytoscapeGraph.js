@@ -65,8 +65,6 @@ export class CytoscapeGraph {
                     }
                 });
             }
-
-            await new Promise(requestAnimationFrame);
         }
 
         return elements;
@@ -417,10 +415,23 @@ export class CytoscapeGraph {
 
         const layoutEnd = performance.now();
 
+        const positions = this.cy.nodes().map(node => {
+
+            const position = node.position();
+
+            return {
+                nodeId: node.id(),
+                nodeName: node.data('name') || node.id(),
+                x: position.x,
+                y: position.y
+            };
+        });
+
         return {
             layoutTime: layoutEnd - layoutStart,
             renderTime: renderEnd - renderStart,
-            totalTime: layoutEnd - totalStart
+            totalTime: layoutEnd - totalStart,
+            positions: positions
         };
     }
 

@@ -38,6 +38,7 @@ const renderers = [
 let classes = [];
 let benchmarkResults = []; 
 let currentGraph = null;
+let layoutPositions = [];
 
 async function loadClasses() {
     try {
@@ -117,10 +118,26 @@ async function benchmarkLibrary(rendererDefinition, graph, repetitions) {
 
         statusElement.textContent = `${rendererDefinition.name}: ` + `ponavljanje ${i + 1}/${repetitions}`;
 
-        await new Promise(resolve => setTimeout(resolve, 50));
-
         const measurement = await measureRenderer(rendererDefinition, graph);
         measurements.push(measurement);
+
+        if (measurement.positions) {
+
+            measurement.positions.forEach(position => {
+
+                layoutPositions.push({
+                    timestamp: new Date().toISOString(),
+                    library: rendererDefinition.name,
+                    nodeCount: graph.nodes.length,
+                    repetition: i + 1,
+                    nodeId: position.nodeId,
+                    nodeName: position.nodeName,
+                    x: position.x,
+                    y: position.y
+                });
+
+            });
+        }
     }
 
     const averageRender = measurements.reduce((sum, measurement) => sum + measurement.renderTime, 0) / measurements.length;
@@ -231,6 +248,62 @@ function exportCSV() {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 }
+
+function exportLayoutPositionsCSV() {
+
+    if (layoutPositions.length === 0) {
+        alert('Nema sačuvanih koordinata layouta.');
+        return;
+    }
+
+    const headers = [
+        'Timestamp',
+        'Library',
+        'Nodes',
+        'Repetition',
+        'Node ID',
+        'Node Name',
+        'X',
+        'Y'
+    ];
+
+    const rows = layoutPositions.map(position => [
+
+        position.timestamp,
+        position.library,
+        position.nodeCount,
+        position.repetition,
+        position.nodeId,
+        position.nodeName,
+        position.x,
+        position.y
+
+    ]);
+
+    const csv = [headers, ...rows].map(row => row
+                .map(value => `"${String(value).replace(/"/g, '""')}"`)
+                .join(',')).join('\n');
+
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = `graph-layout-positions-${new Date().toISOString().replace(/[:.]/g, '-')}.csv`;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+}
+
+function exportAllCSV() {
+    exportCSV();
+    exportLayoutPositionsCSV();
+}
+
 async function runBenchmark() {
 
     const classUri = classSelect.value;
@@ -300,10 +373,7 @@ async function runAutomaticBenchmark() {
     const repetitions = Number(repeatCountInput.value);
     const automaticSizes = [
         100,
-        500,
-        1000,
-        2000,
-        5000
+        500
     ];
 
     if (!classUri) {
@@ -321,6 +391,7 @@ async function runAutomaticBenchmark() {
     document.getElementById('autoBenchmark').disabled = true;
     resultsElement.innerHTML = '';
     benchmarkResults = [];
+    layoutPositions = [];
 
     nodeCountElement.textContent = '-';
     edgeCountElement.textContent = '-';
@@ -366,6 +437,7 @@ async function runAutomaticBenchmark() {
         statusElement.textContent = 'Automatski benchmark je završen.';
 
         exportCSV();
+        exportLayoutPositionsCSV();
     }
     catch (error) {
         console.error(error);
@@ -378,7 +450,7 @@ async function runAutomaticBenchmark() {
 }
 
     startButton.addEventListener('click', runBenchmark);
-    document.getElementById('downloadCSV').addEventListener('click', exportCSV);
+    document.getElementById('downloadCSV').addEventListener('click', exportAllCSV);
     document.getElementById('autoBenchmark').addEventListener('click', runAutomaticBenchmark);
 
     loadClasses();
